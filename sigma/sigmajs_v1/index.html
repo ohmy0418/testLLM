@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Knowledge Graph with Sigma.js</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/sigma.min.js"></script>
+  <style>
+      #container {
+          width: 100%;
+          height: 800px;
+          border: 1px solid black; /* 그래프에 테두리 추가 */
+      }
+  </style>
+</head>
+<body>
+<input type="text" id="search" placeholder="Search node...">
+<label><input type="checkbox" id="filter" /> Apply filter</label>
+<div id="container"></div>
+
+<script>
+  // Sigma 인스턴스 생성
+  const container = document.getElementById('container');
+  const graph = {
+    nodes: [],
+    edges: []
+  };
+
+  // 랜덤 노드 생성
+  for (let i = 0; i < 5000; i++) {
+    graph.nodes.push({
+      id: 'n' + i,
+      label: 'Node ' + i,
+      x: Math.random(),
+      y: Math.random(),
+      size: Math.random() * 10,
+      color: '#'+Math.floor(Math.random()*16777215).toString(16),
+      borderColor: '#000', // 노드의 테두리 색상
+      borderWidth: 2 // 노드의 테두리 너비
+    });
+  }
+
+  // Sigma 그래프 생성 및 랜더링
+  const sigmaInstance = new sigma({
+    graph: graph,
+    container: container,
+    settings: {
+      defaultNodeBorderColor: '#000', // 모든 노드에 대한 기본 테두리 색상
+      defaultNodeBorderWidth: 2 // 모든 노드에 대한 기본 테두리 너비
+    }
+  });
+
+  // 검색 기능 구현
+  document.getElementById('search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    sigmaInstance.graph.nodes().forEach(node => {
+      node.hidden = node.label.toLowerCase().indexOf(searchTerm) === -1;
+    });
+    sigmaInstance.refresh();
+  });
+
+  // 필터 기능 구현
+  document.getElementById('filter').addEventListener('change', function(e) {
+    const isChecked = e.target.checked;
+    sigmaInstance.graph.nodes().forEach(node => {
+      node.hidden = isChecked ? (Math.random() > 0.5) : false; // 예시 필터 로직
+    });
+    sigmaInstance.refresh();
+  });
+</script>
+</body>
+</html>

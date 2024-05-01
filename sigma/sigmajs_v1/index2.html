@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>지식 그래프 시각화</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/sigma.min.js"></script>
+  <style>
+      #container {
+          width: 1000px;
+          height: 800px;
+      }
+  </style>
+</head>
+<body style="background: lightgrey">
+<input type="text" id="search-input" placeholder="노드 검색...">
+<button onclick="searchNode()">검색</button>
+<button onclick="resetGraph()">리셋</button>
+<div id="container"></div>
+<script>
+  // 그래프 데이터 초기화
+  var nodes = [];
+  var edges = [];
+
+  // 노드 세팅
+  for (let i = 1; i <= 5000; i++) {
+    nodes.push({
+      id: 'n' + i,
+      label: 'Node ' + i,
+      x: Math.random(),
+      y: Math.random(),
+      size: Math.random(),
+      color: '#2D5DFF',
+    });
+
+    // 엣지 세팅
+    if (i % 10 === 0) {
+      edges.push({
+        id: 'e' + i,
+        source: 'n' + (i - Math.floor(Math.random() * 10 + 1)),
+        target: 'n' + i,
+        color: '#42C3E9'
+      });
+    }
+  }
+
+  // Sigma 인스턴스 생성
+  var s = new sigma({
+
+    graph: {
+      nodes: nodes,
+      edges: edges
+    },
+    container: 'container',
+    settings: {
+      defaultNodeColor: '#ec5148',
+    }
+  });
+
+  // 검색 기능
+  function searchNode() {
+    var searchTerm = document.getElementById('search-input').value;
+    s.graph.nodes().forEach(function (node) {
+      if (node.label === searchTerm) {
+        node.color = '#E96842'; // 검색된 노드를 빨간색으로 표시
+      } else {
+        node.color = '#D5A090';
+      }
+    });
+    s.refresh(); // 그래프 새로고침
+  }
+
+  // 그래프 리셋
+  function resetGraph() {
+    s.graph.nodes().forEach(function (node) {
+      node.color = '#2D5DFF';
+    });
+    s.refresh(); // 그래프 새로고침
+  }
+</script>
+</body>
+</html>
