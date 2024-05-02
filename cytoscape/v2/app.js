@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     elements: generateElements(3000),
 
+    // 노드와 엣지 스타일 설정
     style: [
       {
         selector: 'node',
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // 노드 갯수, id 지정
   function generateElements(count) {
     let elements = [];
     for (let i = 0; i < count; i++) {
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return elements;
   }
 
+  // 노드 검색
   document.getElementById('search').addEventListener('keyup', function(e) {
     var query = e.target.value.toLowerCase();
     cy.nodes().forEach(node => {
@@ -53,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // 노드 갯수 Half 만 보여주도록 필터
   document.getElementById('filter').addEventListener('change', function(e) {
     var isChecked = e.target.checked;
     cy.nodes().forEach(node => {
@@ -64,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // 마우스 오버
   cy.on('mouseover', 'node', function(event) {
     var node = event.target;
     document.getElementById('tooltip').textContent = 'Node: ' + node.data('id');
@@ -72,10 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('tooltip').style.left = event.renderedPosition.x + 20 + 'px';
   });
 
+  // 마우스 아웃
   cy.on('mouseout', 'node', function(event) {
     document.getElementById('tooltip').style.display = 'none';
   });
 
+  // 줌 인 줌 아웃
   document.getElementById('zoomIn').addEventListener('click', function() {
     cy.zoom(cy.zoom() * 1.2);
   });
