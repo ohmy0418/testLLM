@@ -85,7 +85,7 @@ function saveAsPNG( inputLayers = [] ) {
   }, "image/png");
 }
 
-// 스크린 샷 
+// 스크린 샷
 document.getElementById("save-as-png").addEventListener("click", () => {
   const layers = ["edges", "nodes", "edgeLabels", "labels"].filter(
       (id) => !!(document.getElementById(`layer-${id}`)).checked,
