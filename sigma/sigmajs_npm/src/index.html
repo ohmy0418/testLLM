@@ -6,21 +6,10 @@
   <style>
       #container {
           width: 100%;
-          height: 1000px;
+          height: 700px;
           border: 1px solid #ccc;
       }
-
-      .tooltip {
-          position: absolute;
-          display: none;
-          background: white;
-          border: 1px solid black;
-          padding: 5px;
-          pointer-events: none;
-      }
-
-      .function {
-
+      .controls, .snap {
           display: flex;
           align-items: center;
           gap: 12px;
@@ -41,9 +30,9 @@
       }
 
       .text-input {
-          width: 120px;
+          width: 200px;
           height: 40px;
-          padding: 0;
+          padding: 0 12px;
           background-color: #fff;
           border: 1px solid #ccc;
           border-radius: 4px;
@@ -61,7 +50,7 @@
   </style>
 </head>
 <body>
-<div class="function">
+<div class="controls">
   <input type="text" id="search" class="text-input" placeholder="Search node...">
   <button id="searchButton">검색</button>
   <button id="resetButton">초기화</button>
@@ -69,8 +58,31 @@
   <button id="zoomIn">+</button>
   <button id="zoomOut">-</button>
 </div>
+
+<div class="controls" id="controls">
+  <h3>스냅샷</h3>
+  <div class="snap">
+    <input type="checkbox" id="layer-edges" checked />
+    <label for="layer-edges">Edges</label>
+  </div>
+  <div class="snap">
+    <input type="checkbox" id="layer-nodes" checked />
+    <label for="layer-nodes">Nodes</label>
+  </div>
+  <div class="snap">
+    <input type="checkbox" id="layer-edgeLabels" checked />
+    <label for="layer-edgeLabels">Edge labels</label>
+  </div>
+  <div class="snap">
+    <input type="checkbox" id="layer-labels" checked />
+    <label for="layer-labels">Node labels</label>
+  </div>
+  <br />
+  <button type="button" id="save-as-png">Save as PNG</button>
+</div>
 <div id="container"></div>
 <script src="./app.js" type="module"></script>
+
 
 </body>
 </html>

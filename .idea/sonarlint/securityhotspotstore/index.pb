@@ -31,3 +31,9 @@ P
  sigma/sigmajs_npm/src/index.html,f/0/f05f3a398a17d8344fc28ec12dc159841d5941a9
 L
 sigma/sigmajs_npm/src/app.js,3/4/345d4ce092518fad1ad2963f35bb5e681aedb218
+u
+Esigma/sigmajs_npm/node_modules/sigma/dist/declarations/src/sigma.d.ts,b/8/b81e92d00c87d4d507e32ad62b0e88fb5b63636a
+T
+$sigma/sigmajs_npm/src/screen-shot.js,6/7/672829acaa7f0410814afbbe00747fcd16ce6eb6
+R
+"sigma/sigmajs_npm/src/saveAsPNG.js,2/e/2e8e8f24160a1892d140b6ee5f535010cad7ca42
