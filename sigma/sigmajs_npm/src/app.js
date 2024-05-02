@@ -1,10 +1,9 @@
 import FileSaver from "file-saver";
 import Sigma from 'sigma';
 import Graph from 'graphology';
-
 const graph = new Graph();
 const container = document.getElementById('container');
-// Generate nodes and edges
+// Node / Edge 구성
 for (let i = 0; i < 3000; i++) {
   graph.addNode(i.toString(), {
     label: 'Node ' + i,
@@ -27,7 +26,7 @@ const sigmaInstance = new Sigma(graph, container, {
   }
 });
 
-// 스크린 샷 설정
+// 스크린 샷 기능
 function saveAsPNG( inputLayers = [] ) {
   const {width, height} = sigmaInstance.getDimensions();
   const pixelRatio = window.devicePixelRatio || 1;
@@ -86,6 +85,7 @@ function saveAsPNG( inputLayers = [] ) {
   }, "image/png");
 }
 
+// 스크린 샷 
 document.getElementById("save-as-png").addEventListener("click", () => {
   const layers = ["edges", "nodes", "edgeLabels", "labels"].filter(
       (id) => !!(document.getElementById(`layer-${id}`)).checked,
