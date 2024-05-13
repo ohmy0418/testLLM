@@ -1,21 +1,28 @@
-import FileSaver from "file-saver";
 import Sigma from 'sigma';
 import Graph from 'graphology';
+import FileSaver from "file-saver";
+import { NodeBorderProgram } from "@sigma/node-border";
+import EdgeCurveProgram from "@sigma/edge-curve";
+
 const graph = new Graph();
 const container = document.getElementById('container');
 // Node / Edge 구성
-for (let i = 0; i < 3000; i++) {
+for (let i = 0; i < 300; i++) {
   graph.addNode(i.toString(), {
-    label: 'Node ' + i,
+    label: 'Data-' + i,
     x: Math.random(),
     y: Math.random(),
-    size: 10,
+    // size: 10,
+    size: Math.floor(Math.random() * (Math.floor(20) - Math.ceil(5)) + 5),
+    type: 'border',
     color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-    originalSize: 10
+    originalSize: 10,
+    labelSize: 50,
+    borderColor: 'red'
   });
 
   if (i > 0 && Math.random() > 0.8) {
-    graph.addEdge(i.toString(), (i - 1).toString());
+    graph.addEdge(i.toString(), (i - 1).toString(), {type: "curved"});
   }
 }
 
@@ -23,6 +30,12 @@ const sigmaInstance = new Sigma(graph, container, {
   renderEdgeLabels: true,
   nodeReducer: (node, data) => {
     return {...data, size: data.hidden ? 0 : data.size};
+  },
+  nodeProgramClasses: {
+    border: NodeBorderProgram
+  },
+  edgeProgramClasses: {
+    curved: EdgeCurveProgram
   }
 });
 
@@ -32,7 +45,6 @@ function saveAsPNG( inputLayers = [] ) {
   const pixelRatio = window.devicePixelRatio || 1;
 
   const tmpRoot = document.createElement("DIV");
-  tmpRoot.setAttribute("class", "hoho")
   tmpRoot.style.width = `${width}px`;
   tmpRoot.style.height = `${height}px`;
   tmpRoot.style.position = "absolute";
@@ -124,8 +136,8 @@ document.getElementById('filter').addEventListener('change', function (e) {
 
 // 노드 오버시 사이즈 확대
 sigmaInstance.on('enterNode', ({node}) => {
-  const {label, x, y} = sigmaInstance.graph.getNodeAttributes(node);
-  sigmaInstance.graph.setNodeAttribute(node, 'size', 15);
+  const {size} = sigmaInstance.graph.getNodeAttributes(node);
+  sigmaInstance.graph.setNodeAttribute(node, 'size', size*1.5);
 });
 
 // 노드 리브시 사이드 복원

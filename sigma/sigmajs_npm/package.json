@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@sigma/edge-curve": "^3.0.0-beta.7",
+    "@sigma/node-border": "^3.0.0-beta.3",
     "file-saver": "^2.0.5",
     "graphology": "^0.25.4",
     "sigma": "^3.0.0-beta.18"
