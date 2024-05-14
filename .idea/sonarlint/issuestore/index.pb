@@ -31,3 +31,17 @@ T
 $vue3/vue-project/src/router/index.ts,4/4/442cdd0a1e435d0092469eaf58dcc29009c115b0
 T
 $vue3/vue-project/src/assets/base.css,a/2/a270b32a9fcddbb4ccd88e36ac52f941ab269637
+Å
+Qvue3/vue-project/node_modules/@sigma/node-border/dist/declarations/src/index.d.ts,0/d/0d446b8b0795ada14a8038deeaa94c0afd6d0b80
+Ä
+Pvue3/vue-project/node_modules/@sigma/node-border/dist/sigma-node-border.cjs.d.ts,b/5/b5dc6dcaab183bf3e33478219d373be281f88c62
+K
+vue3/vue-project/index.html,d/7/d74819bfb10bcea178e5042ffb827930ae37dc17
+R
+"vue3/vue-project/package-lock.json,7/7/77e85cbfa9de81696a191676c7c3165b7c74c873
+T
+$vue3/vue-project/src/assets/main.css,7/6/76ae57aeba3655793a989461885d61cb37bdebcd
+]
+-.idea/sonarlint/securityhotspotstore/index.pb,8/8/88a9255124c95bdc913197c120a8d560edc59c8e
+S
+#.idea/sonarlint/issuestore/index.pb,9/f/9fe84ebb15faf917b7def6236dba604453cc61e0

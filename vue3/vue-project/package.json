@@ -13,6 +13,8 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@sigma/edge-curve": "^3.0.0-beta.7",
+    "@sigma/node-border": "^3.0.0-beta.3",
     "@types/sigmajs": "^1.0.32",
     "graphology": "^0.25.4",
     "graphology-layout": "^0.6.1",
