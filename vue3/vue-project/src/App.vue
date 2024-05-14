@@ -3,13 +3,19 @@
     <h3>searchNode: {{ state.searchNode }}</h3>
     <div class="controls">
       <input type="text" v-model="state.searchNode" class="text-input" placeholder="Search nodes..." />
-      <button @click="applySearch">검색</button>
+      <button @click="searchData">검색</button>
       <button @click="resetGraph">초기화</button>
     </div>
     <div class="controls">
-      <label class="checkbox"><input type="checkbox" id="filter" v-model="state.change" @change="checkTest($event)"/>반만 보여줘</label>
+      <label class="checkbox"><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+        보여줘</label>
       <button @click="zoomIn">확대</button>
       <button @click="zoomOut">축소</button>
+      <button @click="zoomReset">초기 사이즈로</button>
+    </div>
+    <div class="controls">
+      <button @click="showRandom">랜덤으로 보이기</button>
+      <button @click="showCircular">원으로 보이기</button>
     </div>
     <div class="container" ref="container"></div>
   </div>
@@ -18,7 +24,10 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, reactive } from 'vue'
 import Graph from 'graphology'
+import { circular } from 'graphology-layout'
 import Sigma from 'sigma'
+import type { PlainObject } from 'sigma/types'
+import { animateNodes } from 'sigma/utils/animate'
 
 export default defineComponent({
   name: 'KnowledgeGraph',
@@ -31,6 +40,9 @@ export default defineComponent({
       change: ref<boolean>(false)
     })
 
+    let cancelCurrentAnimation: (() => void) | null = null
+
+    // 그래프 초기 세팅
     const initializeGraph = () => {
       for (let i = 0; i < 40; i++) {
         state.graph.addNode(i.toString(), {
@@ -40,24 +52,27 @@ export default defineComponent({
           size: Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10),
           color: '#' + Math.floor(Math.random() * 16777215).toString(16),
           originalColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-          labelSize: 20,
+          labelSize: 20
         })
 
         if (i > 0 && Math.random()) {
           state.graph.addEdge(i.toString(), (i - 1).toString(), {
-            type: "arrow",
-            label: "related in",
+            type: 'arrow',
+            label: 'related in',
             size: 2,
             color: '#333333'
           })
         }
       }
+
       state.sigmaInstance = new Sigma(state.graph, container.value!, {
         renderEdgeLabels: true,
+        allowInvalidContainer: true
       })
     }
 
-    const applySearch = () => {
+    // 데이터 검색
+    const searchData = () => {
       const searchLower = state.searchNode.toLowerCase()
       state.graph.forEachNode((node: any, attributes: any) => {
         const data = state.graph.getNodeAttributes(node)
@@ -75,51 +90,92 @@ export default defineComponent({
       state.sigmaInstance?.refresh()
     }
 
+    // 검색 초기화
     const resetGraph = () => {
       state.graph.forEachNode((node: any, attributes: any) => {
         state.graph.setNodeAttribute(node, 'hidden', false)
         state.graph.setNodeAttribute(node, 'color', attributes.originalColor)
-        state.graph.setNodeAttribute(node, 'size', Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10),)
+        state.graph.setNodeAttribute(node, 'size', Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10))
       })
       state.sigmaInstance?.refresh()
     }
 
+    // 확대
     const zoomIn = () => {
-      state.sigmaInstance?.getCamera().animatedZoom({duration: 400})
-
+      state.sigmaInstance?.getCamera().animatedZoom({ duration: 400 })
     }
 
+    // 축소
     const zoomOut = () => {
-      state.sigmaInstance?.getCamera().animatedUnzoom({duration: 400})
+      state.sigmaInstance?.getCamera().animatedUnzoom({ duration: 400 })
     }
 
-    const checkTest = (event: any) => {
-      let isChecked = event.target.checked;
+    // 확대/축소 초기화
+    const zoomReset = () => {
+      state.sigmaInstance?.getCamera().animatedReset({ duration: 600 })
+    }
+
+    // 반만 보이도록 필터
+    const showHalf = (event: any) => {
+      let isChecked = event.target.checked
       state.graph.nodes().forEach((node: any) => {
         state.graph.setNodeAttribute(node, 'hidden', isChecked && Math.random() > 0.5)
       })
     }
 
+    // 랜덤으로 재정렬
+    const showRandom = () => {
+      console.log('show')
+      if (cancelCurrentAnimation) cancelCurrentAnimation()
+
+      const xExtents = { min: 0, max: 0 }
+      const yExtents = { min: 0, max: 0 }
+      state.graph.forEachNode((_node: any, attributes: any) => {
+        xExtents.min = Math.min(attributes.x, xExtents.min)
+        xExtents.max = Math.max(attributes.x, xExtents.max)
+        yExtents.min = Math.min(attributes.y, yExtents.min)
+        yExtents.max = Math.max(attributes.y, yExtents.max)
+      })
+      const randomPositions: PlainObject<PlainObject<number>> = {}
+      state.graph.forEachNode((node: any) => {
+        randomPositions[node] = {
+          x: Math.random() * (xExtents.max - xExtents.min),
+          y: Math.random() * (yExtents.max - yExtents.min)
+        }
+      })
+      cancelCurrentAnimation = animateNodes(state.graph, randomPositions, { duration: 2000 })
+    }
+
+    // 원으로 보여주기 
+    const showCircular = () => {
+      console.log('circular')
+      if (cancelCurrentAnimation) cancelCurrentAnimation()
+
+      const circularPositions = circular(state.graph, { scale: 100 })
+      cancelCurrentAnimation = animateNodes(state.graph, circularPositions, { duration: 2000, easing: 'linear' })
+    }
     onMounted(initializeGraph)
 
-    return { container, state, applySearch, resetGraph, zoomIn, zoomOut, checkTest }
+    return { container, state, searchData, resetGraph, zoomIn, zoomOut, zoomReset, showHalf, showRandom, showCircular }
   }
 })
 </script>
 
 <style scoped>
-.wrap{
+.wrap {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
 .container {
   width: 100%;
   height: 1000px;
   border: 1px solid #ccc;
 }
+
 .controls, .snap {
   display: flex;
   align-items: center;
@@ -157,7 +213,8 @@ button {
   background-color: #fff;
   border-color: #ccc;
   box-shadow: none;
-  input{
+
+  input {
     margin-right: 4px;
   }
 }
