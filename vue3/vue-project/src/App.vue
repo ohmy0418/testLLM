@@ -3,8 +3,13 @@
     <h3>searchNode: {{ state.searchNode }}</h3>
     <div class="controls">
       <input type="text" v-model="state.searchNode" class="text-input" placeholder="Search nodes..." />
-      <button @click="applySearch">Search</button>
-      <button @click="resetGraph">Reset</button>
+      <button @click="applySearch">검색</button>
+      <button @click="resetGraph">초기화</button>
+    </div>
+    <div class="controls">
+      <label class="checkbox"><input type="checkbox" id="filter" v-model="state.change" @change="checkTest($event)"/>반만 보여줘</label>
+      <button @click="zoomIn">확대</button>
+      <button @click="zoomOut">축소</button>
     </div>
     <div class="container" ref="container"></div>
   </div>
@@ -22,7 +27,8 @@ export default defineComponent({
     const state = reactive({
       graph: new Graph() as any,
       sigmaInstance: null as Sigma | null,
-      searchNode: ref<string>('')
+      searchNode: ref<string>(''),
+      change: ref<boolean>(false)
     })
 
     const initializeGraph = () => {
@@ -34,7 +40,7 @@ export default defineComponent({
           size: Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10),
           color: '#' + Math.floor(Math.random() * 16777215).toString(16),
           originalColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-          labelSize: 20
+          labelSize: 20,
         })
 
         if (i > 0 && Math.random()) {
@@ -73,13 +79,30 @@ export default defineComponent({
       state.graph.forEachNode((node: any, attributes: any) => {
         state.graph.setNodeAttribute(node, 'hidden', false)
         state.graph.setNodeAttribute(node, 'color', attributes.originalColor)
+        state.graph.setNodeAttribute(node, 'size', Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10),)
       })
       state.sigmaInstance?.refresh()
     }
 
+    const zoomIn = () => {
+      state.sigmaInstance?.getCamera().animatedZoom({duration: 400})
+
+    }
+
+    const zoomOut = () => {
+      state.sigmaInstance?.getCamera().animatedUnzoom({duration: 400})
+    }
+
+    const checkTest = (event: any) => {
+      let isChecked = event.target.checked;
+      state.graph.nodes().forEach((node: any) => {
+        state.graph.setNodeAttribute(node, 'hidden', isChecked && Math.random() > 0.5)
+      })
+    }
+
     onMounted(initializeGraph)
 
-    return { container, state, applySearch, resetGraph }
+    return { container, state, applySearch, resetGraph, zoomIn, zoomOut, checkTest }
   }
 })
 </script>
@@ -134,5 +157,8 @@ button {
   background-color: #fff;
   border-color: #ccc;
   box-shadow: none;
+  input{
+    margin-right: 4px;
+  }
 }
 </style>
