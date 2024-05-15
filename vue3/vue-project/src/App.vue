@@ -1,3 +1,7 @@
+<!--
+TODO: packages/demo/src/views/GraphEventsController.tsx
+노드 클릭했을 때 새로운 링크(해당 노드)로 이동하는 기능 추가
+-->
 <template>
   <div class="wrap">
     <h3>searchNode: {{ state.searchNode }}</h3>
@@ -94,7 +98,6 @@ export default defineComponent({
           !state.hoveredNeighbors.has(node) &&
           state.hoveredNode !== node
         ) {
-          console.log('res', res)
           res.color = '#005acd'
         }
 
