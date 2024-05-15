@@ -2,13 +2,20 @@
   <div class="wrap">
     <h3>searchNode: {{ state.searchNode }}</h3>
     <div class="controls">
-      <input type="text" v-model="state.searchNode" class="text-input" placeholder="Search nodes..." />
+      <input
+        type="text"
+        v-model="state.searchNode"
+        class="text-input"
+        placeholder="Search nodes..."
+      />
       <button @click="searchData">검색</button>
       <button @click="resetGraph">초기화</button>
     </div>
     <div class="controls">
-      <label class="checkbox"><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
-        보여줘</label>
+      <label class="checkbox"
+      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+        보여줘</label
+      >
       <button @click="zoomIn">확대</button>
       <button @click="zoomOut">축소</button>
       <button @click="zoomReset">초기 사이즈로</button>
@@ -26,7 +33,7 @@ import { defineComponent, onMounted, ref, reactive } from 'vue'
 import Graph from 'graphology'
 import { circular } from 'graphology-layout'
 import Sigma from 'sigma'
-import type { PlainObject } from 'sigma/types'
+import type { PlainObject, NodeDisplayData, EdgeDisplayData } from 'sigma/types'
 import { animateNodes } from 'sigma/utils/animate'
 
 export default defineComponent({
@@ -37,9 +44,10 @@ export default defineComponent({
       graph: new Graph() as any,
       sigmaInstance: null as Sigma | null,
       searchNode: ref<string>(''),
-      change: ref<boolean>(false)
+      change: ref<boolean>(false),
+      hoveredNode: ref<any>(''),
+      hoveredNeighbors: new Set<string>()
     })
-
     let cancelCurrentAnimation: (() => void) | null = null
 
     // 그래프 초기 세팅
@@ -58,9 +66,9 @@ export default defineComponent({
         if (i > 0 && Math.random()) {
           state.graph.addEdge(i.toString(), (i - 1).toString(), {
             type: 'arrow',
-            label: 'related in',
+            label: 'related',
             size: 2,
-            color: '#333333'
+            color: '#4d4d4d'
           })
         }
       }
@@ -69,6 +77,61 @@ export default defineComponent({
         renderEdgeLabels: true,
         allowInvalidContainer: true
       })
+
+      showRandom()
+      state.sigmaInstance?.on('enterNode', ({ node }) => {
+        setHoveredNode(node)
+      })
+      state.sigmaInstance?.on('leaveNode', () => {
+        setHoveredNode(undefined)
+      })
+
+      state.sigmaInstance?.setSetting('nodeReducer', (node, data) => {
+        const res: Partial<NodeDisplayData> = { ...data }
+
+        if (
+          state.hoveredNeighbors &&
+          !state.hoveredNeighbors.has(node) &&
+          state.hoveredNode !== node
+        ) {
+          console.log('res', res)
+          res.color = '#005acd'
+        }
+
+        return res
+      })
+
+      state.sigmaInstance?.setSetting('edgeReducer', (edge, data) => {
+        const res: Partial<EdgeDisplayData> = { ...data }
+
+        if (state.hoveredNode && !state.graph.hasExtremity(edge, state.hoveredNode)) {
+          res.hidden = true
+        }
+
+        return res
+      })
+    }
+
+    const setHoveredNode = (node?: string) => {
+      if (node) {
+        state.hoveredNode = node
+        state.hoveredNeighbors = new Set(state.graph.neighbors(node))
+      }
+
+      const nodes = state.graph.filterNodes(
+        (n: any) => n !== state.hoveredNode && !state.hoveredNeighbors?.has(n)
+      )
+      const nodesIndex = new Set(nodes)
+      const edges = state.graph.filterEdges((e: any) =>
+        state.graph.extremities(e).some((n: any) => nodesIndex.has(n))
+      )
+
+      if (!node) {
+        state.hoveredNode = undefined
+        state.hoveredNeighbors = new Set(undefined)
+      }
+
+      state.sigmaInstance?.refresh({ partialGraph: { nodes, edges }, skipIndexation: true })
     }
 
     // 데이터 검색
@@ -95,7 +158,11 @@ export default defineComponent({
       state.graph.forEachNode((node: any, attributes: any) => {
         state.graph.setNodeAttribute(node, 'hidden', false)
         state.graph.setNodeAttribute(node, 'color', attributes.originalColor)
-        state.graph.setNodeAttribute(node, 'size', Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10))
+        state.graph.setNodeAttribute(
+          node,
+          'size',
+          Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10)
+        )
       })
       state.sigmaInstance?.refresh()
     }
@@ -125,7 +192,6 @@ export default defineComponent({
 
     // 랜덤으로 재정렬
     const showRandom = () => {
-      console.log('show')
       if (cancelCurrentAnimation) cancelCurrentAnimation()
 
       const xExtents = { min: 0, max: 0 }
@@ -146,17 +212,30 @@ export default defineComponent({
       cancelCurrentAnimation = animateNodes(state.graph, randomPositions, { duration: 2000 })
     }
 
-    // 원으로 보여주기 
+    // 원으로 보여주기
     const showCircular = () => {
-      console.log('circular')
       if (cancelCurrentAnimation) cancelCurrentAnimation()
 
       const circularPositions = circular(state.graph, { scale: 100 })
-      cancelCurrentAnimation = animateNodes(state.graph, circularPositions, { duration: 2000, easing: 'linear' })
+      cancelCurrentAnimation = animateNodes(state.graph, circularPositions, {
+        duration: 2000,
+        easing: 'linear'
+      })
     }
     onMounted(initializeGraph)
 
-    return { container, state, searchData, resetGraph, zoomIn, zoomOut, zoomReset, showHalf, showRandom, showCircular }
+    return {
+      container,
+      state,
+      searchData,
+      resetGraph,
+      zoomIn,
+      zoomOut,
+      zoomReset,
+      showHalf,
+      showRandom,
+      showCircular
+    }
   }
 })
 </script>
@@ -176,7 +255,8 @@ export default defineComponent({
   border: 1px solid #ccc;
 }
 
-.controls, .snap {
+.controls,
+.snap {
   display: flex;
   align-items: center;
   gap: 12px;
