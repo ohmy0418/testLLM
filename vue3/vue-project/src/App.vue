@@ -1,7 +1,3 @@
-<!--
-TODO: packages/demo/src/views/GraphEventsController.tsx
-노드 클릭했을 때 새로운 링크(해당 노드)로 이동하는 기능 추가
--->
 <template>
   <div class="wrap">
     <h3>searchNode: {{ state.searchNode }}</h3>
@@ -14,21 +10,25 @@ TODO: packages/demo/src/views/GraphEventsController.tsx
       />
       <button @click="searchData">검색</button>
       <button @click="resetGraph">초기화</button>
-    </div>
-    <div class="controls">
-      <label class="checkbox"
-      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
-        보여줘</label
-      >
-      <button @click="zoomIn">확대</button>
-      <button @click="zoomOut">축소</button>
-      <button @click="zoomReset">초기 사이즈로</button>
+
     </div>
     <div class="controls">
       <button @click="showRandom">랜덤으로 보이기</button>
       <button @click="showCircular">원으로 보이기</button>
+      <p>|</p>
+      <label class="checkbox"
+      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+        보여줘</label
+      >
+      <p>clickData: {{ state.clickData }}</p>
     </div>
-    <div class="container" ref="container"></div>
+    <div class="container" ref="container">
+      <div class="zoom">
+        <button @click="zoomIn">+</button>
+        <button @click="zoomOut">-</button>
+        <button @click="zoomReset">Reset Size</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -49,6 +49,7 @@ export default defineComponent({
       sigmaInstance: null as Sigma | null,
       searchNode: ref<string>(''),
       change: ref<boolean>(false),
+      clickData: ref<string>(''),
       hoveredNode: ref<any>(''),
       hoveredNeighbors: new Set<string>()
     })
@@ -64,7 +65,8 @@ export default defineComponent({
           size: Math.floor(Math.random() * (Math.floor(30) - Math.ceil(10)) + 10),
           color: '#' + Math.floor(Math.random() * 16777215).toString(16),
           originalColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-          labelSize: 20
+          labelSize: 20,
+          url: 'https://www.naver.com/'
         })
 
         if (i > 0 && Math.random()) {
@@ -82,28 +84,36 @@ export default defineComponent({
         allowInvalidContainer: true
       })
 
+      // 로딩 이후 showRandom 한 번 실행
       showRandom()
+
+      // Node 오버 시 선택된 node 전달하여 함수 실행
       state.sigmaInstance?.on('enterNode', ({ node }) => {
         setHoveredNode(node)
       })
+
+      // Node 오버아웃 시 undefined 전달하여 함수 실행
       state.sigmaInstance?.on('leaveNode', () => {
         setHoveredNode(undefined)
       })
 
+      // 노드 마우스 오버 전 기본 값
       state.sigmaInstance?.setSetting('nodeReducer', (node, data) => {
         const res: Partial<NodeDisplayData> = { ...data }
 
         if (
-          state.hoveredNeighbors &&
-          !state.hoveredNeighbors.has(node) &&
-          state.hoveredNode !== node
+          !(state.hoveredNeighbors &&
+            !state.hoveredNeighbors.has(node) &&
+            state.hoveredNode !== node)
         ) {
-          res.color = '#005acd'
+          res.color = '#ee2020'
+          res.size = 30
         }
 
         return res
       })
 
+      // 노드 마우스 오버 후 엣지 상태 값
       state.sigmaInstance?.setSetting('edgeReducer', (edge, data) => {
         const res: Partial<EdgeDisplayData> = { ...data }
 
@@ -113,8 +123,15 @@ export default defineComponent({
 
         return res
       })
+
+      // 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
+      state.sigmaInstance?.on('clickNode', ({ node }) => {
+        window.open(state.graph.getNodeAttribute(node, 'url'), '_blank')
+        state.clickData = state.graph.getNodeAttribute(node, 'url')
+      })
     }
 
+    // 마우스 오버한 node, 관계있는 node 탐색
     const setHoveredNode = (node?: string) => {
       if (node) {
         state.hoveredNode = node
@@ -143,7 +160,7 @@ export default defineComponent({
       state.graph.forEachNode((node: any, attributes: any) => {
         const data = state.graph.getNodeAttributes(node)
         if (attributes.label.toLowerCase().includes(searchLower)) {
-          state.graph.setNodeAttribute(node, 'color', 'rgb(255, 0, 0)')
+          state.graph.setNodeAttribute(node, 'color', attributes.originalColor)
           state.graph.setNodeAttribute(node, 'size', 15)
         } else {
           state.graph.setNodeAttribute(
@@ -185,7 +202,7 @@ export default defineComponent({
       state.sigmaInstance?.getCamera().animatedReset({ duration: 600 })
     }
 
-    // 반만 보이도록 필터
+    // 반만 보이도록 필터 (추후 데이터 카테고리 별로 필터 기능 구현 가능)
     const showHalf = (event: any) => {
       let isChecked = event.target.checked
       state.graph.nodes().forEach((node: any) => {
@@ -225,6 +242,7 @@ export default defineComponent({
         easing: 'linear'
       })
     }
+
     onMounted(initializeGraph)
 
     return {
@@ -253,13 +271,22 @@ export default defineComponent({
 }
 
 .container {
+  position: relative;
   width: 100%;
   height: 1000px;
   border: 1px solid #ccc;
 }
 
-.controls,
-.snap {
+.zoom {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.controls {
   display: flex;
   align-items: center;
   gap: 12px;
