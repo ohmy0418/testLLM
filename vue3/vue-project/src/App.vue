@@ -39,6 +39,7 @@ import { circular } from 'graphology-layout'
 import Sigma from 'sigma'
 import type { PlainObject, NodeDisplayData, EdgeDisplayData } from 'sigma/types'
 import { animateNodes } from 'sigma/utils/animate'
+import FileSaver from "file-saver";
 
 export default defineComponent({
   name: 'KnowledgeGraph',
