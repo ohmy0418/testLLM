@@ -5,16 +5,6 @@ L
 sigma/sigmajs_v2/index2.html,1/9/19209904bf95e8b78c5a1192a72a6e9559f25766
 L
 sigma/sigmajs_v1/index2.html,6/b/6b6f9738b810d9ab1c9b74e6da9ffe34762ac5d7
-N
-sigma/sigmajs_npm/package.json,3/0/30eb0179e4cff266f1cc7e0669cbc78b2e7ddc2d
-S
-#sigma/sigmajs_npm/webpack.config.js,5/9/5943c1457b5ea0c7486762869e8c365ebd56ea5d
-P
- sigma/sigmajs_npm/src/index.html,f/0/f05f3a398a17d8344fc28ec12dc159841d5941a9
-L
-sigma/sigmajs_npm/src/app.js,3/4/345d4ce092518fad1ad2963f35bb5e681aedb218
-u
-Esigma/sigmajs_npm/node_modules/sigma/dist/declarations/src/sigma.d.ts,b/8/b81e92d00c87d4d507e32ad62b0e88fb5b63636a
 G
 cytoscape/v2/index.html,2/4/24ea91bf7b00920c65d55bc5f8078828442b9fac
 C
@@ -45,3 +35,17 @@ $vue3/vue-project/src/assets/main.css,7/6/76ae57aeba3655793a989461885d61cb37bde
 -.idea/sonarlint/securityhotspotstore/index.pb,8/8/88a9255124c95bdc913197c120a8d560edc59c8e
 S
 #.idea/sonarlint/issuestore/index.pb,9/f/9fe84ebb15faf917b7def6236dba604453cc61e0
+d
+4vue3/vue-project/node_modules/sigma/utils/index.d.ts,c/5/c514680a2760025c20e39c1233a240f15f7915b6
+G
+cytoscape/v1/index.html,5/1/51f5b07c3d8fdccaa04aa4377e8cb1a48b39b45f
+t
+Dsigma/sigmajs_js/node_modules/sigma/dist/declarations/src/sigma.d.ts,9/c/9ca5bc876ba4a1714ad0ed0166935ae434a569c3
+_
+/vue3/vue-project/src/components/WelcomeItem.vue,4/f/4f50f5de999cb84fdf2f264865dccde0d053e1c2
+^
+.vue3/vue-project/src/components/HelloWorld.vue,3/7/37168ed011aa85e909c3f73f33dd1f0c5fef1c36
+^
+.vue3/vue-project/src/components/TheWelcome.vue,d/1/d1f732258792fd978f9dff48c0b2fffe9b0f0b30
+b
+2vue3/vue-project/src/components/SigmaComponent.vue,4/1/41675d9e2678c9d47c4bf90d968173c5245785bf
