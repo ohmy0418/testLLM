@@ -20,7 +20,7 @@
     >
     <p>선택한 Node: {{ state.selectedNode }}</p>
   </div>
-  <div class="container" ref="container">
+  <div class="container" ref="container" style="width: 2000px; height: 2000px">
     <div class="zoom">
       <button @click="zoomIn">+</button>
       <button @click="zoomOut">-</button>
@@ -51,14 +51,13 @@ let cancelCurrentAnimation: (() => void) | null = null
 
 // 그래프 초기 세팅
 const initializeGraph = () => {
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10000; i++) {
     state.graph.addNode(i.toString(), {
       label: `Data-${i}`,
       x: Math.random() * 1000,
       y: Math.random() * 1000,
       size: Math.floor(Math.random() * (Math.floor(10) - Math.ceil(2)) + 2),
-      // color: '#' + Math.floo r(Math.random() * 16777215).toString(16),
-      color: '#0d3bf5',
+      color: 'gray',
       url: 'https://www.naver.com/'
     })
 
@@ -73,74 +72,57 @@ const initializeGraph = () => {
   state.sigmaInstance = new Sigma(state.graph, container.value!, {
     renderEdgeLabels: true,
     allowInvalidContainer: true,
-    defaultEdgeColor: '#727171',
+    defaultEdgeColor: '#ccc',
     defaultEdgeType: 'arrow',
     edgeLabelSize: 13,
-    labelSize: 15,
-    nodeReducer(node: string, data: any) {
-      const res: Partial<NodeDisplayData> = { ...data }
-
-      if (
-        state.hoveredNeighbors &&
-        !state.hoveredNeighbors.has(node) &&
-        state.hoveredNode !== node
-      ) {
-      } else {
-        res.color = 'red'
-        res.size = 15
-      }
-
-      return res
-    },
-    edgeReducer(edge: string, data: any) {
-      const res: Partial<EdgeDisplayData> = { ...data }
-      if (state.hoveredNode && !state.graph.hasExtremity(edge, state.hoveredNode)) {
-        res.hidden = true
-      }
-
-      return res
-    }
+    labelSize: 15
   })
 
   // 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
   state.sigmaInstance?.on('clickNode', (event) => {
-    // window.open(state.graph.getNodeAttribute(node, 'url'), '_blank')
     const nodeId = event.node
     state.selectedNode = nodeId
   })
 
   // Node 오버 시 선택된 node 전달하여 함수 실행
-  state.sigmaInstance?.on('enterNode', ({ node }) => {
-    setHoveredNode(node)
+  state.sigmaInstance?.on('enterNode', (event) => {
+    highlightNodeAndNeighbors(event.node)
+    state.sigmaInstance?.refresh()
   })
 
   // Node 오버아웃 시 undefined 전달하여 함수 실행
   state.sigmaInstance?.on('leaveNode', () => {
-    setHoveredNode(undefined)
+    resetColors()
+    state.sigmaInstance?.refresh()
   })
 }
 
-// 마우스 오버한 node, 관계있는 node 탐색
-const setHoveredNode = (node?: string) => {
-  if (node) {
-    state.hoveredNode = node
-    state.hoveredNeighbors = new Set(state.graph.neighbors(node))
+// 노드 컬러 초기화
+const resetColors = () => {
+  state.graph.forEachNode((node: string) => {
+    state.graph.updateNodeAttribute(node, 'color', () => 'gray')
+  })
+}
+
+// 선택된 노드 / 엣지 하이라이트
+const highlightNodeAndNeighbors = (nodeId: string) => {
+  const visitedNodes = new Set<string>()
+  const stack = [nodeId]
+  while (stack.length > 0) {
+    const currentNode = stack.pop()!
+    if (!visitedNodes.has(currentNode)) {
+      visitedNodes.add(currentNode)
+      state.graph.updateNodeAttribute(currentNode, 'color', () =>
+        currentNode === nodeId ? 'red' : ''
+      )
+
+      state.graph.forEachNeighbor(currentNode, (neighbor: string, attributes: object) => {
+        if (!visitedNodes.has(neighbor)) {
+          stack.push(neighbor)
+        }
+      })
+    }
   }
-
-  const nodes = state.graph.filterNodes(
-    (n: any) => n !== state.hoveredNode && !state.hoveredNeighbors?.has(n)
-  )
-  const nodesIndex = new Set(nodes)
-  const edges = state.graph.filterEdges((e: any) =>
-    state.graph.extremities(e).some((n: any) => nodesIndex.has(n))
-  )
-
-  if (!node) {
-    state.hoveredNode = undefined
-    state.hoveredNeighbors = new Set(undefined)
-  }
-
-  state.sigmaInstance?.refresh()
 }
 
 // 데이터 검색
@@ -148,11 +130,10 @@ const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
 
   if (searchLower.includes('data-')) {
-    console.log('data: ', searchLower)
     state.graph.forEachNode((node: any, attributes: any) => {
       const data = state.graph.getNodeAttributes(node)
       if (attributes.label.toLowerCase().includes(searchLower)) {
-        state.graph.setNodeAttribute(node, 'color', 'orange')
+        state.graph.setNodeAttribute(node, 'color', 'red')
         state.graph.setNodeAttribute(node, 'size', 10)
       } else {
         state.graph.setNodeAttribute(
@@ -199,7 +180,7 @@ const searchData = () => {
 const resetGraph = () => {
   state.graph.forEachNode((node: any) => {
     state.graph.setNodeAttribute(node, 'hidden', false)
-    state.graph.setNodeAttribute(node, 'color', '#0d3bf5')
+    state.graph.setNodeAttribute(node, 'color', 'gray')
     state.graph.setNodeAttribute(
       node,
       'size',
@@ -210,7 +191,7 @@ const resetGraph = () => {
   state.graph.forEachEdge((edge: any, attributes: any, source: string, target: string) => {
     state.graph.setEdgeAttribute(edge, 'hidden', false)
     state.graph.setEdgeAttribute(edge, 'size', 2)
-    state.graph.setEdgeAttribute(edge, 'color', '#727171')
+    state.graph.setEdgeAttribute(edge, 'color', '#ccc')
   })
   state.searchNode = ''
   state.sigmaInstance?.refresh()

@@ -1,8 +1,6 @@
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
-
-    <button @click="arrangeGraph">정렬</button>
     <input
       type="text"
       v-model="state.searchNode"
@@ -15,9 +13,10 @@
   <div class="controls">
     <button @click="showRandom">랜덤으로 보이기</button>
     <button @click="showCircular">원으로 보이기</button>
+    <button @click="arrangeGraph">노드의 흐름대로 정렬</button>
     <p>|</p>
     <label class="checkbox"
-    ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
       보여줘</label
     >
     <p>선택한 Node: {{ state.selectedNode }}</p>
@@ -35,7 +34,7 @@
 import { ref, onMounted, reactive } from 'vue'
 import Graph from 'graphology'
 import Sigma from 'sigma'
-import type { PlainObject, NodeDisplayData, EdgeDisplayData } from 'sigma/types'
+import type { PlainObject } from 'sigma/types'
 import { animateNodes } from 'sigma/utils/animate'
 import { circular } from 'graphology-layout'
 
@@ -52,9 +51,7 @@ const state = reactive({
 
 let cancelCurrentAnimation: (() => void) | null = null
 
-
 onMounted(() => {
-
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   const items = ['a', 'b', 'c', 'd']
 
@@ -77,6 +74,7 @@ onMounted(() => {
         x: Math.random() * 100,
         y: Math.random() * 100
       })
+
       state.graph.addEdge(topGroup, groupItem, {
         label: `Edge-${i}`,
         size: 2
@@ -110,7 +108,6 @@ onMounted(() => {
     })
 
     state.sigmaInstance?.on('enterNode', (event) => {
-      resetColors()
       highlightNodeAndNeighbors(event.node)
       state.sigmaInstance?.refresh()
     })
@@ -119,74 +116,58 @@ onMounted(() => {
       resetColors()
       state.sigmaInstance?.refresh()
     })
+
+    // TODO 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
+    state.sigmaInstance?.on('clickNode', (event) => {
+      const nodeId = event.node
+      state.selectedNode = nodeId
+    })
   }
 })
-const arrangeGraph = () => {
-  if (!state.graph || !state.sigmaInstance) return;
-
-  const xSpacing = 150;
-  const ySpacing = 100;
-  let yOffset = 0;
-
-  state.graph.forEachNode((node) => {
-    if (node.startsWith('Group')) {
-      const rootNode = node;
-      let xOffset = 0;
-      state.graph.updateNodeAttribute(rootNode, 'x', () => xOffset);
-      state.graph.updateNodeAttribute(rootNode, 'y', () => yOffset);
-
-      const children = state.graph.neighbors(rootNode);
-      children.forEach((child) => {
-        xOffset += xSpacing;
-        state.graph.updateNodeAttribute(child, 'x', () => xOffset);
-        state.graph.updateNodeAttribute(child, 'y', () => yOffset + ySpacing);
-
-        const grandChildren = state.graph.neighbors(child);
-        let grandChildOffset = xOffset - (grandChildren.length / 2) * xSpacing / 2;
-        grandChildren.forEach((grandChild) => {
-          grandChildOffset += xSpacing / 2;
-          state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset);
-          state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing);
-        });
-      });
-
-      yOffset += 3 * ySpacing;
-    }
-  })
-}
-
-const highlightNodeAndNeighbors = (nodeId: string) => {
-  const visitedNodes = new Set<string>()
-  const visitedEdges = new Set<string>()
-  const stack = [nodeId]
-
-  while (stack.length > 0) {
-    const currentNode = stack.pop()!
-    if (!visitedNodes.has(currentNode)) {
-      visitedNodes.add(currentNode)
-      state.graph.updateNodeAttribute(currentNode, 'color', () => currentNode === nodeId ? 'red' : 'orange')
-
-      state.graph.forEachNeighbor(currentNode, (neighbor: any, attributes: any, edgeId: string) => {
-        if (!visitedNodes.has(neighbor)) {
-          stack.push(neighbor)
-        }
-        if (edgeId && !visitedEdges.has(edgeId)) {
-          visitedEdges.add(edgeId)
-          state.graph.updateEdgeAttribute(edgeId, 'color', () => 'orange')
-        }
-      })
-    }
-  }
-}
+// 노드 컬러 초기화
 const resetColors = () => {
   state.graph.forEachNode((node: string) => {
-    const originalColor = node.includes('-') ? (node.split('-').length === 2 ? 'gray' : 'lightgray') : 'black'
+    const originalColor = node.includes('-')
+      ? node.split('-').length === 2
+        ? 'gray'
+        : 'lightgray'
+      : 'black'
     state.graph.updateNodeAttribute(node, 'color', () => originalColor)
   })
   state.graph.forEachEdge((edge: string) => {
     state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
   })
 }
+
+// 선택된 노드 / 엣지 하이라이트
+const highlightNodeAndNeighbors = (nodeId: string) => {
+  const visitedNodes = new Set<string>()
+  const visitedEdges = new Set<string>()
+  const stack = [nodeId]
+  while (stack.length > 0) {
+    const currentNode = stack.pop()!
+    if (!visitedNodes.has(currentNode)) {
+      visitedNodes.add(currentNode)
+      state.graph.updateNodeAttribute(currentNode, 'color', () =>
+        currentNode === nodeId ? 'red' : 'orange'
+      )
+
+      state.graph.forEachNeighbor(currentNode, (neighbor: any, attributes: any) => {
+        if (!visitedNodes.has(neighbor)) {
+          stack.push(neighbor)
+        }
+      })
+
+      state.graph.forEachEdge(currentNode, (edge: string, attr: object) => {
+        if (edge && !visitedEdges.has(edge)) {
+          visitedEdges.add(edge)
+          state.graph.updateEdgeAttribute(edge, 'color', () => 'blue')
+        }
+      })
+    }
+  }
+}
+
 // 데이터 검색
 const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
@@ -208,7 +189,7 @@ const searchData = () => {
     state.graph.forEachNode((node: any, attributes: any) => {
       const data = state.graph.getNodeAttributes(node)
       if (attributes.label.toLowerCase().includes(searchLower)) {
-        state.graph.setNodeAttribute(node, 'color', 'purple')
+        state.graph.setNodeAttribute(node, 'color', 'red')
       } else {
         state.graph.setNodeAttribute(
           node,
@@ -269,6 +250,41 @@ const showCircular = () => {
   })
 }
 
+// TODO 노드 순으로 정렬
+const arrangeGraph = () => {
+  if (!state.graph || !state.sigmaInstance) return
+
+  const xSpacing = 300
+  const ySpacing = 100
+  let yOffset = 0
+
+  state.graph.forEachNode((node: string, attributes: object) => {
+    if (node.startsWith('Group')) {
+      const rootNode = node
+      let xOffset = 0
+      state.graph.updateNodeAttribute(rootNode, 'x', () => xOffset)
+      state.graph.updateNodeAttribute(rootNode, 'y', () => yOffset)
+
+      const children = state.graph.neighbors(rootNode)
+      children.forEach((child: any) => {
+        xOffset += xSpacing
+        state.graph.updateNodeAttribute(child, 'x', () => xOffset)
+        state.graph.updateNodeAttribute(child, 'y', () => yOffset + ySpacing)
+
+        const grandChildren = state.graph.neighbors(child)
+        let grandChildOffset = xOffset - ((grandChildren.length / 2) * xSpacing) / 2
+        grandChildren.forEach((grandChild: any) => {
+          grandChildOffset += xSpacing / 2
+          state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset)
+          state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing)
+        })
+      })
+
+      yOffset += 3 * ySpacing
+    }
+  })
+}
+
 // 반만 보이도록 필터 (추후 데이터 카테고리 별로 필터 기능 구현 가능)
 const showHalf = (event: any) => {
   let isChecked = event.target.checked
@@ -291,7 +307,6 @@ const zoomOut = () => {
 const zoomReset = () => {
   state.sigmaInstance?.getCamera().animatedReset({ duration: 600 })
 }
-
 </script>
 
 <style></style>
