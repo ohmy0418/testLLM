@@ -1,6 +1,6 @@
 
-Rtypescript:S1128$"/Remove this unused import of 'NodeDisplayData'.(ÿ¹¸÷8Ó ôúø1
-Rtypescript:S1128$"/Remove this unused import of 'EdgeDisplayData'.(ÿ¹¸÷8Ô ôúø1
-wtypescript:S3776{"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(Îûõ±8É§ûø1
-htypescript:S3358”"DExtract this nested ternary operation into an independent statement.(Ø¼˜Ò8Ê§ûø1
-4	css:S4667‘"Unexpected empty source(æ¡¨8Ï–‹ûø1
+Rtypescript:S1128&"/Remove this unused import of 'NodeDisplayData'.(ÿ¹¸÷8™†âûø1
+Rtypescript:S1128&"/Remove this unused import of 'EdgeDisplayData'.(ÿ¹¸÷8™†âûø1
+xtypescript:S3776"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(Îûõ±8¤Ôêûø1
+htypescript:S3358·"DExtract this nested ternary operation into an independent statement.(Ø¼˜Ò8¤Ôêûø1
+4	css:S4667©"Unexpected empty source(æ¡¨8Ï–‹ûø1

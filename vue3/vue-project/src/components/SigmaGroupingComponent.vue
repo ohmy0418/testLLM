@@ -1,6 +1,8 @@
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
+
+    <button @click="arrangeGraph">정렬</button>
     <input
       type="text"
       v-model="state.searchNode"
@@ -119,6 +121,39 @@ onMounted(() => {
     })
   }
 })
+const arrangeGraph = () => {
+  if (!state.graph || !state.sigmaInstance) return;
+
+  const xSpacing = 150;
+  const ySpacing = 100;
+  let yOffset = 0;
+
+  state.graph.forEachNode((node) => {
+    if (node.startsWith('Group')) {
+      const rootNode = node;
+      let xOffset = 0;
+      state.graph.updateNodeAttribute(rootNode, 'x', () => xOffset);
+      state.graph.updateNodeAttribute(rootNode, 'y', () => yOffset);
+
+      const children = state.graph.neighbors(rootNode);
+      children.forEach((child) => {
+        xOffset += xSpacing;
+        state.graph.updateNodeAttribute(child, 'x', () => xOffset);
+        state.graph.updateNodeAttribute(child, 'y', () => yOffset + ySpacing);
+
+        const grandChildren = state.graph.neighbors(child);
+        let grandChildOffset = xOffset - (grandChildren.length / 2) * xSpacing / 2;
+        grandChildren.forEach((grandChild) => {
+          grandChildOffset += xSpacing / 2;
+          state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset);
+          state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing);
+        });
+      });
+
+      yOffset += 3 * ySpacing;
+    }
+  })
+}
 
 const highlightNodeAndNeighbors = (nodeId: string) => {
   const visitedNodes = new Set<string>()
@@ -157,7 +192,6 @@ const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
 
   if (searchLower.includes('edge-')) {
-    let nodeValue = 'data-'.concat(searchLower.slice(5))
     state.graph.forEachEdge((edge: any, attributes: any) => {
       const data = state.graph.getEdgeAttributes(edge)
       if (attributes.label.toLowerCase().includes(searchLower)) {
@@ -167,17 +201,6 @@ const searchData = () => {
           edge,
           'hidden',
           data.label.toLowerCase().indexOf(searchLower) === -1
-        )
-      }
-    })
-
-    state.graph.forEachNode((node: any, attributes: any) => {
-      const data = state.graph.getNodeAttributes(node)
-      if (!attributes.label.toLowerCase().includes(nodeValue)) {
-        state.graph.setNodeAttribute(
-          node,
-          'hidden',
-          data.label.toLowerCase().indexOf(nodeValue) === -1
         )
       }
     })
@@ -207,6 +230,7 @@ const resetGraph = () => {
 
   state.graph.forEachEdge((edge: any, attributes: any, source: string, target: string) => {
     state.graph.setEdgeAttribute(edge, 'hidden', false)
+    state.graph.setEdgeAttribute(edge, 'color', '#ccc')
   })
   state.searchNode = ''
   state.sigmaInstance?.refresh()
