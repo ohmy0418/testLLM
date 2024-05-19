@@ -105,9 +105,8 @@ const initializeGraph = () => {
   // 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
   state.sigmaInstance?.on('clickNode', (event) => {
     // window.open(state.graph.getNodeAttribute(node, 'url'), '_blank')
-    const nodeId = event.node;
-    state.selectedNode = nodeId;
-
+    const nodeId = event.node
+    state.selectedNode = nodeId
   })
 
   // Node 오버 시 선택된 node 전달하여 함수 실행
@@ -141,7 +140,7 @@ const setHoveredNode = (node?: string) => {
     state.hoveredNeighbors = new Set(undefined)
   }
 
-  state.sigmaInstance?.refresh({ partialGraph: { nodes, edges }, skipIndexation: true })
+  state.sigmaInstance?.refresh()
 }
 
 // 데이터 검색
@@ -276,56 +275,4 @@ const showCircular = () => {
 onMounted(initializeGraph)
 </script>
 
-<style scoped>
-.zoom {
-  position: absolute;
-  bottom: calc(100% + 14px);
-  right: 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  min-width: 40px;
-  height: 40px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: none;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.text-input {
-  width: 200px;
-  height: 40px;
-  padding: 0 12px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: none;
-}
-
-.checkbox {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border-color: #ccc;
-  box-shadow: none;
-
-  input {
-    margin-right: 4px;
-  }
-}
-</style>
+<style scoped></style>
