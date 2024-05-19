@@ -15,10 +15,10 @@
     <button @click="showCircular">원으로 보이기</button>
     <p>|</p>
     <label class="checkbox"
-    ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
       보여줘</label
     >
-    <p>clickData: {{ state.clickData }}</p>
+    <p>선택한 Node: {{ state.selectedNode }}</p>
   </div>
   <div class="container" ref="container">
     <div class="zoom">
@@ -43,9 +43,9 @@ const state = reactive({
   sigmaInstance: null as Sigma | null,
   searchNode: ref<string>(''),
   change: ref<boolean>(false),
-  clickData: ref<string>(''),
   hoveredNode: ref<any>(''),
-  hoveredNeighbors: new Set<string>()
+  hoveredNeighbors: new Set<string>(),
+  selectedNode: null as string | null
 })
 let cancelCurrentAnimation: (() => void) | null = null
 
@@ -103,9 +103,11 @@ const initializeGraph = () => {
   })
 
   // 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
-  state.sigmaInstance?.on('clickNode', ({ node }) => {
-    window.open(state.graph.getNodeAttribute(node, 'url'), '_blank')
-    state.clickData = state.graph.getNodeAttribute(node, 'url')
+  state.sigmaInstance?.on('clickNode', (event) => {
+    // window.open(state.graph.getNodeAttribute(node, 'url'), '_blank')
+    const nodeId = event.node;
+    state.selectedNode = nodeId;
+
   })
 
   // Node 오버 시 선택된 node 전달하여 함수 실행
@@ -154,7 +156,11 @@ const searchData = () => {
         state.graph.setNodeAttribute(node, 'color', 'orange')
         state.graph.setNodeAttribute(node, 'size', 10)
       } else {
-        state.graph.setNodeAttribute(node, 'hidden', data.label.toLowerCase().indexOf(searchLower) === -1)
+        state.graph.setNodeAttribute(
+          node,
+          'hidden',
+          data.label.toLowerCase().indexOf(searchLower) === -1
+        )
       }
     })
   } else if (searchLower.includes('edge-')) {
@@ -165,14 +171,22 @@ const searchData = () => {
         state.graph.setEdgeAttribute(edge, 'color', 'orange')
         state.graph.setEdgeAttribute(edge, 'size', 3)
       } else {
-        state.graph.setEdgeAttribute(edge, 'hidden', data.label.toLowerCase().indexOf(searchLower) === -1)
+        state.graph.setEdgeAttribute(
+          edge,
+          'hidden',
+          data.label.toLowerCase().indexOf(searchLower) === -1
+        )
       }
     })
 
     state.graph.forEachNode((node: any, attributes: any) => {
       const data = state.graph.getNodeAttributes(node)
-      if (!(attributes.label.toLowerCase().includes(nodeValue))) {
-        state.graph.setNodeAttribute(node, 'hidden', data.label.toLowerCase().indexOf(nodeValue) === -1)
+      if (!attributes.label.toLowerCase().includes(nodeValue)) {
+        state.graph.setNodeAttribute(
+          node,
+          'hidden',
+          data.label.toLowerCase().indexOf(nodeValue) === -1
+        )
       }
     })
   } else {
@@ -263,13 +277,6 @@ onMounted(initializeGraph)
 </script>
 
 <style scoped>
-.container {
-  position: relative;
-  width: 100%;
-  height: 1000px;
-  border: 1px solid #ccc;
-}
-
 .zoom {
   position: absolute;
   bottom: calc(100% + 14px);

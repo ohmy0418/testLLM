@@ -1,14 +1,21 @@
 <template>
+  <div class="gnb">
+    <RouterLink to="/sigma">Go to Sigma</RouterLink>
+    <RouterLink to="/sigmaGrouping">Go to Sigma Grouping</RouterLink>
+  </div>
   <div class="wrap">
-    <SigmaComponent />
+    <router-view></router-view>
   </div>
 </template>
 
-<script lang="ts" setup>
-import SigmaComponent from './components/SigmaComponent.vue'
-</script>
+<script lang="ts" setup></script>
 
 <style scoped>
+.gnb {
+  display: flex;
+  gap: 12px;
+}
+
 .wrap {
   width: 100%;
   height: 100%;
