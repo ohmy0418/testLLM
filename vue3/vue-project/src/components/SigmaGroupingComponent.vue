@@ -15,7 +15,7 @@
     <button @click="showCircular">원으로 보이기</button>
     <p>|</p>
     <label class="checkbox"
-      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+    ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
       보여줘</label
     >
     <p>선택한 Node: {{ state.selectedNode }}</p>
@@ -45,7 +45,7 @@ const state = reactive({
   change: ref<boolean>(false),
   hoveredNode: ref<any>(''),
   hoveredNeighbors: new Set<string>(),
-  selectedNode: null as string | null,
+  selectedNode: null as string | null
 })
 
 let cancelCurrentAnimation: (() => void) | null = null
@@ -53,128 +53,148 @@ let cancelCurrentAnimation: (() => void) | null = null
 
 onMounted(() => {
 
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const items = ['a', 'b', 'c', 'd'];
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const items = ['a', 'b', 'c', 'd']
 
   alphabet.split('').forEach((groupLetter) => {
-    const topGroup = `Group${groupLetter}`;
-    state.graph.addNode(topGroup, { label: topGroup, size: 20, color: 'black', x: Math.random() * 100, y: Math.random() * 100 });
+    const topGroup = `Group${groupLetter}`
+    state.graph.addNode(topGroup, {
+      label: topGroup,
+      size: 20,
+      color: 'black',
+      x: Math.random() * 100,
+      y: Math.random() * 100
+    })
 
     for (let i = 1; i <= 4; i++) {
-      const groupItem = `${groupLetter}-${i}`;
-      state.graph.addNode(groupItem, { label: groupItem, size: 10, color: 'gray', x: Math.random() * 100, y: Math.random() * 100 });
-      state.graph.addEdge(topGroup, groupItem);
+      const groupItem = `${groupLetter}-${i}`
+      state.graph.addNode(groupItem, {
+        label: groupItem,
+        size: 10,
+        color: 'gray',
+        x: Math.random() * 100,
+        y: Math.random() * 100
+      })
+      state.graph.addEdge(topGroup, groupItem, {
+        label: `Edge-${i}`,
+        size: 2
+      })
 
       items.forEach((item) => {
-        const nodeId = `${groupItem}-${item}`;
-        state.graph.addNode(nodeId, { label: nodeId, size: 5, color: 'lightgray', x: Math.random() * 100, y: Math.random() * 100 });
-        state.graph.addEdge(groupItem, nodeId);
-      });
+        const nodeId = `${groupItem}-${item}`
+        state.graph.addNode(nodeId, {
+          label: nodeId,
+          size: 5,
+          color: 'lightgray',
+          x: Math.random() * 100,
+          y: Math.random() * 100
+        })
+        state.graph.addEdge(groupItem, nodeId, {
+          label: `Edge-${i}`,
+          size: 2
+        })
+      })
     }
-  });
+  })
 
   if (container.value) {
-    state.sigmaInstance = new Sigma(state.graph, container.value);
+    state.sigmaInstance = new Sigma(state.graph, container.value, {
+      renderEdgeLabels: true,
+      allowInvalidContainer: true,
+      defaultEdgeColor: '#ccc',
+      defaultEdgeType: 'arrow',
+      edgeLabelSize: 13,
+      labelSize: 15
+    })
 
     state.sigmaInstance?.on('enterNode', (event) => {
-      resetColors();
-      highlightNodeAndNeighbors(event.node);
-      state.sigmaInstance?.refresh();
-    });
+      resetColors()
+      highlightNodeAndNeighbors(event.node)
+      state.sigmaInstance?.refresh()
+    })
 
     state.sigmaInstance?.on('leaveNode', () => {
-      resetColors();
-      state.sigmaInstance?.refresh();
-    });
+      resetColors()
+      state.sigmaInstance?.refresh()
+    })
   }
-});
+})
 
 const highlightNodeAndNeighbors = (nodeId: string) => {
-  const visitedNodes = new Set<string>();
-  const visitedEdges = new Set<string>();
-  const stack = [nodeId];
+  const visitedNodes = new Set<string>()
+  const visitedEdges = new Set<string>()
+  const stack = [nodeId]
 
   while (stack.length > 0) {
-    const currentNode = stack.pop()!;
+    const currentNode = stack.pop()!
     if (!visitedNodes.has(currentNode)) {
-      visitedNodes.add(currentNode);
-      state.graph.updateNodeAttribute(currentNode, 'color', () => currentNode === nodeId ? 'red' : 'orange');
+      visitedNodes.add(currentNode)
+      state.graph.updateNodeAttribute(currentNode, 'color', () => currentNode === nodeId ? 'red' : 'orange')
 
-      state.graph.forEachNeighbor(currentNode, (neighbor:any, attributes:any, edgeId:string) => {
+      state.graph.forEachNeighbor(currentNode, (neighbor: any, attributes: any, edgeId: string) => {
         if (!visitedNodes.has(neighbor)) {
-          stack.push(neighbor);
+          stack.push(neighbor)
         }
         if (edgeId && !visitedEdges.has(edgeId)) {
-          visitedEdges.add(edgeId);
-          state.graph.updateEdgeAttribute(edgeId, 'color', () => 'orange');
+          visitedEdges.add(edgeId)
+          state.graph.updateEdgeAttribute(edgeId, 'color', () => 'orange')
         }
-      });
+      })
     }
   }
-};
+}
 const resetColors = () => {
-  state.graph.forEachNode((node:string) => {
-    const originalColor = node.includes('-') ? (node.split('-').length === 2 ? 'gray' : 'lightgray') : 'black';
-    state.graph.updateNodeAttribute(node, 'color', () => originalColor);
-  });
-  state.graph.forEachEdge((edge:string) => {
-    state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc');
-  });
-};
+  state.graph.forEachNode((node: string) => {
+    const originalColor = node.includes('-') ? (node.split('-').length === 2 ? 'gray' : 'lightgray') : 'black'
+    state.graph.updateNodeAttribute(node, 'color', () => originalColor)
+  })
+  state.graph.forEachEdge((edge: string) => {
+    state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
+  })
+}
 // 데이터 검색
 const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
-  state.graph.forEachNode((node: any, attributes: any) => {
-    const data = state.graph.getNodeAttributes(node)
-    if (attributes.label.toLowerCase().includes(searchLower)) {
-      state.graph.setNodeAttribute(node, 'color', 'purple')
-    } else {
-      state.graph.setNodeAttribute(
-        node,
-        'hidden',
-        data.label.toLowerCase().indexOf(searchLower) === -1
-      )
-    }
-  })
-  // if (searchLower.includes('edge-')) {
-  //   let nodeValue = 'data-'.concat(searchLower.slice(5))
-  //   state.graph.forEachEdge((edge: any, attributes: any) => {
-  //     const data = state.graph.getEdgeAttributes(edge)
-  //     if (attributes.label.toLowerCase().includes(searchLower)) {
-  //       state.graph.setEdgeAttribute(edge, 'color', 'green')
-  //     } else {
-  //       state.graph.setEdgeAttribute(
-  //         edge,
-  //         'hidden',
-  //         data.label.toLowerCase().indexOf(searchLower) === -1
-  //       )
-  //     }
-  //   })
-  //
-  //   state.graph.forEachNode((node: any, attributes: any) => {
-  //     const data = state.graph.getNodeAttributes(node)
-  //     if (!attributes.label.toLowerCase().includes(nodeValue)) {
-  //       state.graph.setNodeAttribute(
-  //         node,
-  //         'hidden',
-  //         data.label.toLowerCase().indexOf(nodeValue) === -1
-  //       )
-  //     }
-  //   })
-  // } else {
-  //   state.graph.forEachNode((node: any, attributes: any) => {
-  //     const data = state.graph.getNodeAttributes(node)
-  //     if (attributes.label.toLowerCase().includes(searchLower)) {
-  //       state.graph.setNodeAttribute(node, 'color', 'purple')
-  //     } else {
-  //       state.graph.setNodeAttribute(
-  //         node,
-  //         'hidden',
-  //         data.label.toLowerCase().indexOf(searchLower) === -1
-  //       )
-  //     }
-  //   })
-  // }
+  
+  if (searchLower.includes('edge-')) {
+    let nodeValue = 'data-'.concat(searchLower.slice(5))
+    state.graph.forEachEdge((edge: any, attributes: any) => {
+      const data = state.graph.getEdgeAttributes(edge)
+      if (attributes.label.toLowerCase().includes(searchLower)) {
+        state.graph.setEdgeAttribute(edge, 'color', 'green')
+      } else {
+        state.graph.setEdgeAttribute(
+          edge,
+          'hidden',
+          data.label.toLowerCase().indexOf(searchLower) === -1
+        )
+      }
+    })
+
+    state.graph.forEachNode((node: any, attributes: any) => {
+      const data = state.graph.getNodeAttributes(node)
+      if (!attributes.label.toLowerCase().includes(nodeValue)) {
+        state.graph.setNodeAttribute(
+          node,
+          'hidden',
+          data.label.toLowerCase().indexOf(nodeValue) === -1
+        )
+      }
+    })
+  } else {
+    state.graph.forEachNode((node: any, attributes: any) => {
+      const data = state.graph.getNodeAttributes(node)
+      if (attributes.label.toLowerCase().includes(searchLower)) {
+        state.graph.setNodeAttribute(node, 'color', 'purple')
+      } else {
+        state.graph.setNodeAttribute(
+          node,
+          'hidden',
+          data.label.toLowerCase().indexOf(searchLower) === -1
+        )
+      }
+    })
+  }
 
   state.sigmaInstance?.refresh()
 }
