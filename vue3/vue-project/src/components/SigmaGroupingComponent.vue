@@ -155,7 +155,7 @@ const resetColors = () => {
 // 데이터 검색
 const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
-  
+
   if (searchLower.includes('edge-')) {
     let nodeValue = 'data-'.concat(searchLower.slice(5))
     state.graph.forEachEdge((edge: any, attributes: any) => {
