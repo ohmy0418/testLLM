@@ -390,32 +390,33 @@ const arrangeGraph = () => {
   const ySpacing = 150
   let yOffset = 0
 
+  const positions: { [key: string]: { x: number; y: number } } = {}
+
   state.graph.forEachNode((node: string, attr: any) => {
     if (node.startsWith('Group')) {
       const rootNode = node
       let xOffset = 0
-      state.graph.updateNodeAttribute(rootNode, 'x', () => xOffset)
-      state.graph.updateNodeAttribute(rootNode, 'y', () => yOffset)
+      positions[rootNode] = { x: xOffset, y: yOffset }
 
       const children = state.graph.neighbors(rootNode)
       children.forEach((child: any) => {
         xOffset += xSpacing
-        state.graph.updateNodeAttribute(child, 'x', () => xOffset)
-        state.graph.updateNodeAttribute(child, 'y', () => yOffset + ySpacing)
+        positions[child] = { x: xOffset, y: yOffset + ySpacing }
 
         const grandChildren = state.graph.neighbors(child)
         let grandChildOffset = xOffset - ((grandChildren.length / 2) * xSpacing) / 2
         grandChildren.forEach((grandChild: any) => {
           grandChildOffset += xSpacing / 2
           if (!grandChild.startsWith('Group')) {
-            state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset)
-            state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing)
+            positions[grandChild] = { x: grandChildOffset, y: yOffset + 2 * ySpacing }
           }
         })
       })
       yOffset += 3 * ySpacing
     }
   })
+
+  cancelCurrentAnimation = animateNodes(state.graph, positions, { duration: 2000 })
 }
 
 // 반만 보이도록 필터 (추후 데이터 카테고리 별로 필터 기능 구현 가능)
