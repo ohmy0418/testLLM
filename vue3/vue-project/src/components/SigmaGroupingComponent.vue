@@ -180,8 +180,10 @@ onMounted(() => {
 
     state.sigmaInstance?.getMouseCaptor().on('mousedown', () => {
       console.log('mousedown')
-      if (!state.sigmaInstance?.getCustomBBox()) state.sigmaInstance?.setCustomBBox(state.sigmaInstance?.getBBox());
-    });
+      if (!state.sigmaInstance?.getCustomBBox()) state.sigmaInstance?.setCustomBBox(state.sigmaInstance?.getBBox())
+    })
+
+    requestAnimationFrame(updateDraggedNodePosition)
   }
   console.log(state.graph.nodes())
 
