@@ -1,4 +1,4 @@
-<!-- 그룹화가 되어있는 800개의 데이터 -->
+<!-- 그룹화가 되어있는 1500개의 데이터 -->
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
@@ -75,8 +75,8 @@ const state = reactive({
 let cancelCurrentAnimation: (() => void) | null = null
 
 onMounted(() => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하'
-  const items = ['a', 'b', 'c', 'd']
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하고노도로보소오조초토포코호'
+  const items = ['a', 'b', 'c', 'd', 'e', 'f']
 
   alphabet.split('').forEach((groupLetter) => {
     const topGroup = `Group${groupLetter}`
@@ -147,6 +147,7 @@ onMounted(() => {
       state.selectedNode = nodeId
     })
   }
+  console.log(state.graph.nodes())
 
   showRandom()
 })
