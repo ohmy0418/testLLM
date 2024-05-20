@@ -47,8 +47,6 @@ const state = reactive({
   change: ref<boolean>(false),
   hoveredNode: ref<any>(''),
   hoveredNeighbors: new Set<string>(),
-  highlightedNodes: new Set<string>(),
-  highlightedEdges: new Set<string>(),
   selectedNode: null as string | null
 })
 
