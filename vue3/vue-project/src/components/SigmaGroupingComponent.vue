@@ -52,7 +52,7 @@ const state = reactive({
 let cancelCurrentAnimation: (() => void) | null = null
 
 onMounted(() => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하'
   const items = ['a', 'b', 'c', 'd']
 
   alphabet.split('').forEach((groupLetter) => {
@@ -124,6 +124,7 @@ onMounted(() => {
     })
   }
 })
+
 // 노드 컬러 초기화
 const resetColors = () => {
   state.graph.forEachNode((node: string) => {
@@ -157,6 +158,7 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
           stack.push(neighbor)
         }
       })
+
 
       state.graph.forEachEdge(currentNode, (edge: string, attr: object) => {
         if (edge && !visitedEdges.has(edge)) {
@@ -236,7 +238,7 @@ const showRandom = () => {
       y: Math.random() * (yExtents.max - yExtents.min)
     }
   })
-  cancelCurrentAnimation = animateNodes(state.graph, randomPositions, { duration: 2000 })
+  cancelCurrentAnimation = animateNodes(state.graph, randomPositions, { duration: 1500 })
 }
 
 // 원으로 보여주기
@@ -244,13 +246,9 @@ const showCircular = () => {
   if (cancelCurrentAnimation) cancelCurrentAnimation()
 
   const circularPositions = circular(state.graph, { scale: 100 })
-  cancelCurrentAnimation = animateNodes(state.graph, circularPositions, {
-    duration: 2000,
-    easing: 'linear'
-  })
+  cancelCurrentAnimation = animateNodes(state.graph, circularPositions, { duration: 1500 })
 }
 
-// TODO 노드 순으로 정렬
 const arrangeGraph = () => {
   if (!state.graph || !state.sigmaInstance) return
 
@@ -258,7 +256,7 @@ const arrangeGraph = () => {
   const ySpacing = 100
   let yOffset = 0
 
-  state.graph.forEachNode((node: string, attributes: object) => {
+  state.graph.forEachNode((node: string, attr: any) => {
     if (node.startsWith('Group')) {
       const rootNode = node
       let xOffset = 0
@@ -275,11 +273,12 @@ const arrangeGraph = () => {
         let grandChildOffset = xOffset - ((grandChildren.length / 2) * xSpacing) / 2
         grandChildren.forEach((grandChild: any) => {
           grandChildOffset += xSpacing / 2
-          state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset)
-          state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing)
+          if(!grandChild.startsWith('Group')){
+            state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset)
+            state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing)
+          }
         })
       })
-
       yOffset += 3 * ySpacing
     }
   })
