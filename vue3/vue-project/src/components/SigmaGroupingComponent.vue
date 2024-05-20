@@ -1,4 +1,4 @@
-<!-- 그룹화가 되어있는 1500개의 데이터 -->
+<!-- 그룹화가 되어있는 1300개의 데이터 -->
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
@@ -69,14 +69,16 @@ const state = reactive({
   change: ref<boolean>(false),
   hoveredNode: ref<any>(''),
   hoveredNeighbors: new Set<string>(),
-  selectedNode: null as string | null
+  selectedNode: null as string | null,
+  draggedNode:  null as string | null,
+  isDragging: ref<boolean>(false)
 })
 
 let cancelCurrentAnimation: (() => void) | null = null
 
 onMounted(() => {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하고노도로보소오조초토포코호'
-  const items = ['a', 'b', 'c', 'd', 'e', 'f']
+  const items = ['a', 'b', 'c', 'd']
 
   alphabet.split('').forEach((groupLetter) => {
     const topGroup = `Group${groupLetter}`
@@ -146,6 +148,40 @@ onMounted(() => {
       const nodeId = event.node
       state.selectedNode = nodeId
     })
+
+    state.sigmaInstance?.on('downNode', (event) => {
+      console.log(event.node)
+      state.isDragging = true;
+      state.draggedNode = event.node;
+      state.graph.setNodeAttribute(state.draggedNode, 'highlighted', true)
+    })
+
+    state.sigmaInstance?.getMouseCaptor().on('mousemovebody', (event)=>{
+      if (!state.isDragging || !state.draggedNode) return;
+
+      const pos = state.sigmaInstance?.viewportToGraph(event);
+
+      state.graph.setNodeAttribute(state.draggedNode, "x", pos.x);
+      state.graph.setNodeAttribute(state.draggedNode, "y", pos.y);
+
+      event.preventSigmaDefault();
+      event.original.preventDefault();
+      event.original.stopPropagation();
+    })
+
+    state.sigmaInstance?.getMouseCaptor().on("mouseup", () => {
+      console.log('mouseup')
+      if (state.draggedNode) {
+        state.graph.removeNodeAttribute(state.draggedNode, "highlighted");
+      }
+      state.isDragging = false;
+      state.draggedNode = null;
+    });
+
+    state.sigmaInstance?.getMouseCaptor().on("mousedown", () => {
+      console.log('mousedown')
+      if (!state.sigmaInstance?.getCustomBBox()) state.sigmaInstance?.setCustomBBox(state.sigmaInstance?.getBBox());
+    });
   }
   console.log(state.graph.nodes())
 
