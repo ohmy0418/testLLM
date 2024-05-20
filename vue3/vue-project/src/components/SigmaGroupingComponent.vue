@@ -151,8 +151,8 @@ onMounted(() => {
 
     state.sigmaInstance?.on('downNode', (event) => {
       console.log(event.node)
-      state.isDragging = true;
-      state.draggedNode = event.node;
+      state.isDragging = true
+      state.draggedNode = event.node
       state.graph.setNodeAttribute(state.draggedNode, 'highlighted', true)
     })
 
@@ -169,16 +169,16 @@ onMounted(() => {
       event.original.stopPropagation();
     })
 
-    state.sigmaInstance?.getMouseCaptor().on("mouseup", () => {
+    state.sigmaInstance?.getMouseCaptor().on('mouseup', () => {
       console.log('mouseup')
       if (state.draggedNode) {
-        state.graph.removeNodeAttribute(state.draggedNode, "highlighted");
+        state.graph.removeNodeAttribute(state.draggedNode, 'highlighted')
       }
       state.isDragging = false;
       state.draggedNode = null;
     });
 
-    state.sigmaInstance?.getMouseCaptor().on("mousedown", () => {
+    state.sigmaInstance?.getMouseCaptor().on('mousedown', () => {
       console.log('mousedown')
       if (!state.sigmaInstance?.getCustomBBox()) state.sigmaInstance?.setCustomBBox(state.sigmaInstance?.getBBox());
     });
