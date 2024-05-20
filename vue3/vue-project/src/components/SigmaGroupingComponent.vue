@@ -70,8 +70,6 @@ const state = reactive({
   hoveredNode: ref<any>(''),
   hoveredNeighbors: new Set<string>(),
   selectedNode: null as string | null,
-  draggedNode:  null as string | null,
-  isDragging: ref<boolean>(false)
 })
 
 let cancelCurrentAnimation: (() => void) | null = null
@@ -148,42 +146,6 @@ onMounted(() => {
       const nodeId = event.node
       state.selectedNode = nodeId
     })
-
-    state.sigmaInstance?.on('downNode', (event) => {
-      console.log(event.node)
-      state.isDragging = true
-      state.draggedNode = event.node
-      state.graph.setNodeAttribute(state.draggedNode, 'highlighted', true)
-    })
-
-    state.sigmaInstance?.getMouseCaptor().on('mousemovebody', (event)=>{
-      if (!state.isDragging || !state.draggedNode) return;
-
-      const pos = state.sigmaInstance?.viewportToGraph(event);
-
-      state.graph.setNodeAttribute(state.draggedNode, "x", pos.x);
-      state.graph.setNodeAttribute(state.draggedNode, "y", pos.y);
-
-      event.preventSigmaDefault();
-      event.original.preventDefault();
-      event.original.stopPropagation();
-    })
-
-    state.sigmaInstance?.getMouseCaptor().on('mouseup', () => {
-      console.log('mouseup')
-      if (state.draggedNode) {
-        state.graph.removeNodeAttribute(state.draggedNode, 'highlighted')
-      }
-      state.isDragging = false;
-      state.draggedNode = null;
-    });
-
-    state.sigmaInstance?.getMouseCaptor().on('mousedown', () => {
-      console.log('mousedown')
-      if (!state.sigmaInstance?.getCustomBBox()) state.sigmaInstance?.setCustomBBox(state.sigmaInstance?.getBBox())
-    })
-
-    requestAnimationFrame(updateDraggedNodePosition)
   }
   console.log(state.graph.nodes())
 
@@ -250,7 +212,7 @@ const searchData = () => {
     state.graph.forEachEdge((edge: any, attributes: any) => {
       const data = state.graph.getEdgeAttributes(edge)
       if (attributes.label.toLowerCase().includes(searchLower)) {
-        state.graph.setEdgeAttribute(edge, 'color', 'green')
+        state.graph.setEdgeAttribute(edge, 'color', 'skyblue')
       } else {
         state.graph.setEdgeAttribute(
           edge,
