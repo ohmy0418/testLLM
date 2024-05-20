@@ -20,11 +20,11 @@
     "graphology": "^0.25.4",
     "graphology-layout": "^0.6.1",
     "graphology-layout-force": "^0.2.4",
+    "graphology-types": "^0.24.7",
+    "iwanthue": "^2.0.0",
     "sigma": "2.3.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "iwanthue": "^2.0.0",
-    "graphology-types": "^0.24.7"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",

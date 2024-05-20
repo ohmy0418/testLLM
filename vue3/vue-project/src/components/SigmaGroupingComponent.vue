@@ -22,6 +22,27 @@
     >
     <p>선택한 Node: {{ state.selectedNode }}</p>
   </div>
+  <div class="controls" id="controls">
+    <h3>스냅샷</h3>
+    <div class="snap">
+      <input type="checkbox" id="layer-edges" checked />
+      <label for="layer-edges">Edges</label>
+    </div>
+    <div class="snap">
+      <input type="checkbox" id="layer-nodes" checked />
+      <label for="layer-nodes">Nodes</label>
+    </div>
+    <div class="snap">
+      <input type="checkbox" id="layer-edgeLabels" checked />
+      <label for="layer-edgeLabels">Edge labels</label>
+    </div>
+    <div class="snap">
+      <input type="checkbox" id="layer-labels" checked />
+      <label for="layer-labels">Node labels</label>
+    </div>
+    <br />
+    <button type="button" id="save-as-png" @click="saveAsPng">Save as PNG</button>
+  </div>
   <div ref="container" class="container">
     <div class="zoom">
       <button @click="zoomIn">+</button>
@@ -38,6 +59,7 @@ import Sigma from 'sigma'
 import type { PlainObject } from 'sigma/types'
 import { animateNodes } from 'sigma/utils/animate'
 import { circular } from 'graphology-layout'
+import FileSaver from 'file-saver'
 
 const container = ref<HTMLElement | null>(null)
 const state = reactive({
@@ -228,6 +250,70 @@ const resetGraph = () => {
   })
   state.searchNode = ''
   state.sigmaInstance?.refresh()
+}
+
+// png 저장
+const saveAsPng = () => {
+  const layers = ['edges', 'nodes', 'edgeLabels', 'labels'].filter(
+    (id) => !!(document.getElementById(`layer-${id}`) as HTMLInputElement).checked
+  )
+
+  settingPng(state.sigmaInstance, layers)
+}
+
+const settingPng = (renderer: Sigma, inputLayers?: string[]) => {
+  const { width, height } = renderer.getDimensions()
+
+  const pixelRatio = window.devicePixelRatio || 1
+
+  const tmpRoot = document.createElement('DIV')
+  tmpRoot.style.width = `${width}px`
+  tmpRoot.style.height = `${height}px`
+  tmpRoot.style.position = 'absolute'
+  tmpRoot.style.right = '101%'
+  tmpRoot.style.bottom = '101%'
+  document.body.appendChild(tmpRoot)
+
+  // Copy camera and force to render now, to avoid having to wait the schedule /
+  // debounce frame:
+  renderer.getCamera().setState(renderer.getCamera().getState())
+  renderer.refresh()
+
+  // Create a new canvas, on which the different layers will be drawn:
+  const canvas = document.createElement('CANVAS') as HTMLCanvasElement
+  canvas.setAttribute('width', width * pixelRatio + '')
+  canvas.setAttribute('height', height * pixelRatio + '')
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+
+  // Draw a white background first:
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(0, 0, width * pixelRatio, height * pixelRatio)
+
+  // For each layer, draw it on our canvas:
+  const canvases = renderer.getCanvases()
+  const layers = inputLayers ? inputLayers.filter((id) => !!canvases[id]) : Object.keys(canvases)
+  layers.forEach((id) => {
+    ctx.drawImage(
+      canvases[id],
+      0,
+      0,
+      width * pixelRatio,
+      height * pixelRatio,
+      0,
+      0,
+      width * pixelRatio,
+      height * pixelRatio
+    )
+  })
+
+  // Save the canvas as a PNG image:
+  canvas.toBlob((blob) => {
+    if (blob) FileSaver.saveAs(blob, 'graph.png')
+
+    // Cleanup:
+    renderer.refresh()
+    tmpRoot.remove()
+  }, 'image/png')
 }
 
 // 랜덤으로 재정렬
