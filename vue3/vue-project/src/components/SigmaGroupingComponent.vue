@@ -1,12 +1,7 @@
 <template>
   <h3>searchNode: {{ searchNode }}</h3>
   <div class="controls">
-    <input
-      type="text"
-      v-model="searchNode"
-      class="text-input"
-      placeholder="Search nodes..."
-    />
+    <input type="text" v-model="searchNode" class="text-input" placeholder="Search nodes..." />
     <button @click="searchData">검색</button>
     <button @click="resetGraph">초기화</button>
   </div>
@@ -69,7 +64,8 @@ const selectedNode = ref<string | null>(null)
 let cancelCurrentAnimation: (() => void) | null = null
 
 const initializeGraph = () => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하고노도로보소오조초토포코호'
+  const alphabet =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ가나다라마바사아자차타카파하고노도로보소오조초토포코호'
   const items = ['a', 'b', 'c', 'd']
 
   alphabet.split('').forEach((groupLetter) => {
@@ -93,7 +89,7 @@ const initializeGraph = () => {
       })
 
       graph.addEdge(topGroup, groupItem, {
-        label: `Edge-${i}`,
+        label: `Edge-${groupLetter}`,
         size: 2
       })
 
@@ -107,7 +103,7 @@ const initializeGraph = () => {
           y: Math.random() * 100
         })
         graph.addEdge(groupItem, nodeId, {
-          label: `Edge-${i}`,
+          label: `Edge-${groupItem}`,
           size: 2
         })
       })
@@ -155,7 +151,7 @@ const resetColors = () => {
         ? 'gray'
         : 'lightgray'
       : 'black'
-    graph.updateNodeAttribute(node, 'color',() =>  originalColor)
+    graph.updateNodeAttribute(node, 'color', () => originalColor)
   })
 
   graph.forEachEdge((edge: string) => {
@@ -174,7 +170,9 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
     const currentNode = stack.pop()!
     if (!visitedNodes.has(currentNode)) {
       visitedNodes.add(currentNode)
-      graph.updateNodeAttribute(currentNode, 'color', () => currentNode === nodeId ? 'red' : 'orange')
+      graph.updateNodeAttribute(currentNode, 'color', () =>
+        currentNode === nodeId ? 'red' : 'orange'
+      )
 
       graph.forEachNeighbor(currentNode, (neighbor: string) => {
         if (!visitedNodes.has(neighbor)) {
@@ -192,7 +190,7 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
 
   graph.forEachEdge((edge: string) => {
     if (!visitedEdges.has(edge)) {
-      graph.updateEdgeAttribute(edge, 'hidden',() =>  true)
+      graph.updateEdgeAttribute(edge, 'hidden', () => true)
     }
   })
 }
@@ -214,7 +212,6 @@ const searchData = () => {
     graph.forEachNode((node: any, attributes: any) => {
       const data = graph.getNodeAttributes(node)
       if (attributes.label.toLowerCase().includes(searchLower)) {
-        graph.setNodeAttribute(node, 'color', 'red')
       } else {
         graph.setNodeAttribute(node, 'hidden', data.label.toLowerCase().indexOf(searchLower) === -1)
       }
