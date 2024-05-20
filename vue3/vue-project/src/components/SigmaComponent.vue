@@ -1,3 +1,4 @@
+<!-- 그룹화가 없는 10000개의 데이터 -->
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
@@ -20,7 +21,7 @@
     >
     <p>선택한 Node: {{ state.selectedNode }}</p>
   </div>
-  <div class="container" ref="container" style="width: 2000px; height: 2000px">
+  <div class="container" ref="container" style="width: 1500px; height: 1500px">
     <div class="zoom">
       <button @click="zoomIn">+</button>
       <button @click="zoomOut">-</button>
@@ -85,16 +86,16 @@ const initializeGraph = () => {
   })
 
   // Node 오버 시 선택된 node 전달하여 함수 실행
-  state.sigmaInstance?.on('enterNode', (event) => {
-    highlightNodeAndNeighbors(event.node)
-    state.sigmaInstance?.refresh()
-  })
+  // state.sigmaInstance?.on('enterNode', (event) => {
+  //   highlightNodeAndNeighbors(event.node)
+  //   state.sigmaInstance?.refresh()
+  // })
 
   // Node 오버아웃 시 undefined 전달하여 함수 실행
-  state.sigmaInstance?.on('leaveNode', () => {
-    resetColors()
-    state.sigmaInstance?.refresh()
-  })
+  // state.sigmaInstance?.on('leaveNode', () => {
+  //   resetColors()
+  //   state.sigmaInstance?.refresh()
+  // })
 }
 
 // 노드 컬러 초기화

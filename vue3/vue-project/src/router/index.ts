@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SigmaView from '../views/SigmaView.vue'
+import SigmaDefaultView from '../views/SigmaDefaultView.vue'
 import SigmaGroupingView from '../views/SigmaGroupingView.vue'
 
 const router = createRouter({
@@ -23,6 +24,11 @@ const router = createRouter({
       path: '/sigma',
       name: 'sigma',
       component: SigmaView
+    },
+    {
+      path: '/sigmaDefault',
+      name: 'sigmaDefault',
+      component: SigmaDefaultView
     },
     {
       path: '/sigmaGrouping',

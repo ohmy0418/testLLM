@@ -1,3 +1,4 @@
+<!-- 그룹화가 되어있는 800개의 데이터 -->
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
@@ -46,6 +47,8 @@ const state = reactive({
   change: ref<boolean>(false),
   hoveredNode: ref<any>(''),
   hoveredNeighbors: new Set<string>(),
+  highlightedNodes: new Set<string>(),
+  highlightedEdges: new Set<string>(),
   selectedNode: null as string | null
 })
 
@@ -108,6 +111,7 @@ onMounted(() => {
     })
 
     state.sigmaInstance?.on('enterNode', (event) => {
+      resetColors()
       highlightNodeAndNeighbors(event.node)
       state.sigmaInstance?.refresh()
     })
@@ -123,6 +127,8 @@ onMounted(() => {
       state.selectedNode = nodeId
     })
   }
+
+  showRandom()
 })
 
 // 노드 컬러 초기화
@@ -135,8 +141,10 @@ const resetColors = () => {
       : 'black'
     state.graph.updateNodeAttribute(node, 'color', () => originalColor)
   })
+
   state.graph.forEachEdge((edge: string) => {
     state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
+    state.graph.updateEdgeAttribute(edge, 'hidden', () => false)
   })
 }
 
@@ -145,6 +153,7 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
   const visitedNodes = new Set<string>()
   const visitedEdges = new Set<string>()
   const stack = [nodeId]
+
   while (stack.length > 0) {
     const currentNode = stack.pop()!
     if (!visitedNodes.has(currentNode)) {
@@ -153,21 +162,25 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
         currentNode === nodeId ? 'red' : 'orange'
       )
 
-      state.graph.forEachNeighbor(currentNode, (neighbor: any, attributes: any) => {
+      state.graph.forEachNeighbor(currentNode, (neighbor: string) => {
         if (!visitedNodes.has(neighbor)) {
           stack.push(neighbor)
         }
       })
 
-
-      state.graph.forEachEdge(currentNode, (edge: string, attr: object) => {
-        if (edge && !visitedEdges.has(edge)) {
-          visitedEdges.add(edge)
-          state.graph.updateEdgeAttribute(edge, 'color', () => 'blue')
-        }
+      state.graph.forEachEdge(currentNode, (edge: string) => {
+        visitedEdges.add(edge)
+        state.graph.updateEdgeAttribute(edge, 'color', () => 'blue')
+        state.graph.updateEdgeAttribute(edge, 'hidden', () => false)
       })
     }
   }
+
+  state.graph.forEachEdge((edge: string) => {
+    if (!visitedEdges.has(edge)) {
+      state.graph.updateEdgeAttribute(edge, 'hidden', () => true)
+    }
+  })
 }
 
 // 데이터 검색
@@ -253,7 +266,7 @@ const arrangeGraph = () => {
   if (!state.graph || !state.sigmaInstance) return
 
   const xSpacing = 300
-  const ySpacing = 100
+  const ySpacing = 150
   let yOffset = 0
 
   state.graph.forEachNode((node: string, attr: any) => {
@@ -273,7 +286,7 @@ const arrangeGraph = () => {
         let grandChildOffset = xOffset - ((grandChildren.length / 2) * xSpacing) / 2
         grandChildren.forEach((grandChild: any) => {
           grandChildOffset += xSpacing / 2
-          if(!grandChild.startsWith('Group')){
+          if (!grandChild.startsWith('Group')) {
             state.graph.updateNodeAttribute(grandChild, 'x', () => grandChildOffset)
             state.graph.updateNodeAttribute(grandChild, 'y', () => yOffset + 2 * ySpacing)
           }

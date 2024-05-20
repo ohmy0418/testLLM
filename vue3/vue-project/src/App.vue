@@ -1,6 +1,6 @@
 <template>
   <div class="gnb">
-    <RouterLink to="/sigma">Go to Sigma</RouterLink>
+    <RouterLink to="/sigma">Go to Sigma BigData</RouterLink>
     <RouterLink to="/sigmaGrouping">Go to Sigma Grouping</RouterLink>
   </div>
   <div class="wrap">
