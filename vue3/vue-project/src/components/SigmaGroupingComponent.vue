@@ -99,7 +99,7 @@ const initializeGraph = () => {
         graph.addNode(nodeId, {
           label: nodeId,
           size: 5,
-          color: 'lightgray',
+          color: '#afaeae',
           x: Math.random() * 100,
           y: Math.random() * 100
         })
@@ -119,7 +119,7 @@ onMounted(() => {
     sigmaInstance.value = new Sigma(graph, container.value, {
       renderEdgeLabels: true,
       allowInvalidContainer: true,
-      defaultEdgeColor: '#ccc',
+      defaultEdgeColor: '#ddd',
       defaultEdgeType: 'arrow',
       edgeLabelSize: 13,
       labelSize: 15
@@ -150,13 +150,13 @@ const resetColors = () => {
     const originalColor = node.includes('-')
       ? node.split('-').length === 2
         ? 'gray'
-        : 'lightgray'
+        : '#afaeae'
       : 'black'
     graph.updateNodeAttribute(node, 'color', () => originalColor)
   })
 
   graph.forEachEdge((edge: string) => {
-    graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
+    graph.updateEdgeAttribute(edge, 'color', () => '#ddd')
     graph.updateEdgeAttribute(edge, 'hidden', () => false)
   })
 }
@@ -230,7 +230,7 @@ const resetGraph = () => {
 
   graph.forEachEdge((edge: any, attributes: any, source: string, target: string) => {
     graph.setEdgeAttribute(edge, 'hidden', false)
-    graph.setEdgeAttribute(edge, 'color', '#ccc')
+    graph.setEdgeAttribute(edge, 'color', '#ddd')
   })
   searchNode.value = ''
   sigmaInstance.value?.refresh()

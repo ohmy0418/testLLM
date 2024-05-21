@@ -56,7 +56,7 @@ const initializeGraph = () => {
       x: Math.random() * 1000,
       y: Math.random() * 1000,
       size: Math.floor(Math.random() * (10 - 2 + 1)) + 2,
-      color: 'gray',
+      color: '#afaeae',
       url: 'https://www.naver.com/'
     })
 
@@ -71,7 +71,7 @@ const initializeGraph = () => {
   state.sigmaInstance = new Sigma(state.graph, container.value!, {
     renderEdgeLabels: true,
     allowInvalidContainer: true,
-    defaultEdgeColor: '#ccc',
+    defaultEdgeColor: '#ddd',
     defaultEdgeType: 'arrow',
     edgeLabelSize: 13,
     labelSize: 15
@@ -115,14 +115,14 @@ const searchData = () => {
 const resetGraph = () => {
   state.graph.forEachNode((node) => {
     state.graph.updateNodeAttribute(node, 'hidden', () => false)
-    state.graph.updateNodeAttribute(node, 'color', () => 'gray')
+    state.graph.updateNodeAttribute(node, 'color', () => '#afaeae')
     state.graph.updateNodeAttribute(node, 'size', () => Math.floor(Math.random() * (10 - 2 + 1)) + 2)
   })
 
   state.graph.forEachEdge((edge) => {
     state.graph.updateEdgeAttribute(edge, 'hidden', () => false)
     state.graph.updateEdgeAttribute(edge, 'size', () => 2)
-    state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
+    state.graph.updateEdgeAttribute(edge, 'color', () => '#ddd')
   })
   state.searchNode = ''
   state.sigmaInstance?.refresh()
