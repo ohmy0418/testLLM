@@ -84,32 +84,6 @@ const initializeGraph = () => {
   showRandom()
 }
 
-// 노드 컬러 초기화
-const resetColors = () => {
-  state.graph.forEachNode((node) => {
-    state.graph.updateNodeAttribute(node, 'color', 'gray')
-  })
-}
-
-// 선택된 노드 / 엣지 하이라이트
-const highlightNodeAndNeighbors = (nodeId: string) => {
-  const visitedNodes = new Set<string>()
-  const stack = [nodeId]
-  while (stack.length > 0) {
-    const currentNode = stack.pop()!
-    if (!visitedNodes.has(currentNode)) {
-      visitedNodes.add(currentNode)
-      state.graph.updateNodeAttribute(currentNode, 'color', currentNode === nodeId ? 'red' : '')
-
-      state.graph.forEachNeighbor(currentNode, (neighbor) => {
-        if (!visitedNodes.has(neighbor)) {
-          stack.push(neighbor)
-        }
-      })
-    }
-  }
-}
-
 // 데이터 검색
 const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
