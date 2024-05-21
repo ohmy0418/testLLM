@@ -1,4 +1,3 @@
-<!-- 그룹화가 없는 10000개의 데이터 -->
 <template>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
@@ -15,10 +14,10 @@
     <button @click="showRandom">랜덤으로 보이기</button>
     <button @click="showCircular">원으로 보이기</button>
     <p>|</p>
-    <label class="checkbox"
-      ><input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
-      보여줘</label
-    >
+    <label class="checkbox">
+      <input type="checkbox" id="filter" v-model="state.change" @change="showHalf($event)" />반만
+      보여줘
+    </label>
     <p>선택한 Node: {{ state.selectedNode }}</p>
   </div>
   <div class="container" ref="container" style="width: 1500px; height: 1500px">
@@ -35,17 +34,15 @@ import { onMounted, ref, reactive } from 'vue'
 import Graph from 'graphology'
 import { circular } from 'graphology-layout'
 import Sigma from 'sigma'
-import type { PlainObject, NodeDisplayData, EdgeDisplayData } from 'sigma/types'
+import type { PlainObject } from 'sigma/types'
 import { animateNodes } from 'sigma/utils/animate'
 
 const container = ref<HTMLElement | null>(null)
 const state = reactive({
-  graph: new Graph() as any,
+  graph: new Graph(),
   sigmaInstance: null as Sigma | null,
   searchNode: ref<string>(''),
   change: ref<boolean>(false),
-  hoveredNode: ref<any>(''),
-  hoveredNeighbors: new Set<string>(),
   selectedNode: null as string | null
 })
 let cancelCurrentAnimation: (() => void) | null = null
@@ -57,12 +54,12 @@ const initializeGraph = () => {
       label: `Data-${i}`,
       x: Math.random() * 1000,
       y: Math.random() * 1000,
-      size: Math.floor(Math.random() * (Math.floor(10) - Math.ceil(2)) + 2),
+      size: Math.floor(Math.random() * (10 - 2 + 1)) + 2,
       color: 'gray',
       url: 'https://www.naver.com/'
     })
 
-    if (state.graph.nodes().length > 1) {
+    if (i > 0) {
       state.graph.addEdge(i.toString(), (i - 1).toString(), {
         label: `Edge-${i}`,
         size: 2
@@ -79,29 +76,17 @@ const initializeGraph = () => {
     labelSize: 15
   })
 
-  // 노드 클릭 시 url 이동 이벤트 (추후 데이터를 재겁색 하는 기능으로 바꿀 수 있을듯)
   state.sigmaInstance?.on('clickNode', (event) => {
-    const nodeId = event.node
-    state.selectedNode = nodeId
+    state.selectedNode = event.node
   })
 
-  // Node 오버 시 선택된 node 전달하여 함수 실행
-  // state.sigmaInstance?.on('enterNode', (event) => {
-  //   highlightNodeAndNeighbors(event.node)
-  //   state.sigmaInstance?.refresh()
-  // })
-
-  // Node 오버아웃 시 undefined 전달하여 함수 실행
-  // state.sigmaInstance?.on('leaveNode', () => {
-  //   resetColors()
-  //   state.sigmaInstance?.refresh()
-  // })
+  showRandom()
 }
 
 // 노드 컬러 초기화
 const resetColors = () => {
-  state.graph.forEachNode((node: string) => {
-    state.graph.updateNodeAttribute(node, 'color', () => 'gray')
+  state.graph.forEachNode((node) => {
+    state.graph.updateNodeAttribute(node, 'color', 'gray')
   })
 }
 
@@ -113,11 +98,9 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
     const currentNode = stack.pop()!
     if (!visitedNodes.has(currentNode)) {
       visitedNodes.add(currentNode)
-      state.graph.updateNodeAttribute(currentNode, 'color', () =>
-        currentNode === nodeId ? 'red' : ''
-      )
+      state.graph.updateNodeAttribute(currentNode, 'color', currentNode === nodeId ? 'red' : '')
 
-      state.graph.forEachNeighbor(currentNode, (neighbor: string, attributes: object) => {
+      state.graph.forEachNeighbor(currentNode, (neighbor) => {
         if (!visitedNodes.has(neighbor)) {
           stack.push(neighbor)
         }
@@ -130,69 +113,41 @@ const highlightNodeAndNeighbors = (nodeId: string) => {
 const searchData = () => {
   const searchLower = state.searchNode.toLowerCase()
 
-  if (searchLower.includes('data-')) {
-    state.graph.forEachNode((node: any, attributes: any) => {
-      const data = state.graph.getNodeAttributes(node)
-      if (attributes.label.toLowerCase().includes(searchLower)) {
-        state.graph.setNodeAttribute(node, 'color', 'red')
-        state.graph.setNodeAttribute(node, 'size', 10)
-      } else {
-        state.graph.setNodeAttribute(
-          node,
-          'hidden',
-          data.label.toLowerCase().indexOf(searchLower) === -1
-        )
-      }
-    })
-  } else if (searchLower.includes('edge-')) {
-    let nodeValue = 'data-'.concat(searchLower.slice(5))
-    state.graph.forEachEdge((edge: any, attributes: any) => {
-      const data = state.graph.getEdgeAttributes(edge)
-      if (attributes.label.toLowerCase().includes(searchLower)) {
-        state.graph.setEdgeAttribute(edge, 'color', 'orange')
-        state.graph.setEdgeAttribute(edge, 'size', 3)
-      } else {
-        state.graph.setEdgeAttribute(
-          edge,
-          'hidden',
-          data.label.toLowerCase().indexOf(searchLower) === -1
-        )
-      }
-    })
+  state.graph.forEachNode((node, attributes) => {
+    const data = state.graph.getNodeAttributes(node)
+    if (attributes.label.toLowerCase().includes(searchLower)) {
+      state.graph.updateNodeAttribute(node, 'color', () => 'red')
+      state.graph.updateNodeAttribute(node, 'size', () => 10)
+    } else {
+      state.graph.updateNodeAttribute(node, 'hidden', () => true)
+    }
+  })
 
-    state.graph.forEachNode((node: any, attributes: any) => {
-      const data = state.graph.getNodeAttributes(node)
-      if (!attributes.label.toLowerCase().includes(nodeValue)) {
-        state.graph.setNodeAttribute(
-          node,
-          'hidden',
-          data.label.toLowerCase().indexOf(nodeValue) === -1
-        )
-      }
-    })
-  } else {
-    window.alert('data-숫자, edge-숫자 형식으로 입력하세요.')
-  }
+  state.graph.forEachEdge((edge, attributes) => {
+    const data = state.graph.getEdgeAttributes(edge)
+    if (attributes.label.toLowerCase().includes(searchLower)) {
+      state.graph.updateEdgeAttribute(edge, 'color', () => 'orange')
+      state.graph.updateEdgeAttribute(edge, 'size', () => 3)
+    } else {
+      state.graph.updateEdgeAttribute(edge, 'hidden', () => true)
+    }
+  })
 
   state.sigmaInstance?.refresh()
 }
 
 // 노드, 엣지 초기화
 const resetGraph = () => {
-  state.graph.forEachNode((node: any) => {
-    state.graph.setNodeAttribute(node, 'hidden', false)
-    state.graph.setNodeAttribute(node, 'color', 'gray')
-    state.graph.setNodeAttribute(
-      node,
-      'size',
-      Math.floor(Math.random() * (Math.floor(10) - Math.ceil(2)) + 2)
-    )
+  state.graph.forEachNode((node) => {
+    state.graph.updateNodeAttribute(node, 'hidden', () => false)
+    state.graph.updateNodeAttribute(node, 'color', () => 'gray')
+    state.graph.updateNodeAttribute(node, 'size', () => Math.floor(Math.random() * (10 - 2 + 1)) + 2)
   })
 
-  state.graph.forEachEdge((edge: any, attributes: any, source: string, target: string) => {
-    state.graph.setEdgeAttribute(edge, 'hidden', false)
-    state.graph.setEdgeAttribute(edge, 'size', 2)
-    state.graph.setEdgeAttribute(edge, 'color', '#ccc')
+  state.graph.forEachEdge((edge) => {
+    state.graph.updateEdgeAttribute(edge, 'hidden', () => false)
+    state.graph.updateEdgeAttribute(edge, 'size', () => 2)
+    state.graph.updateEdgeAttribute(edge, 'color', () => '#ccc')
   })
   state.searchNode = ''
   state.sigmaInstance?.refresh()
@@ -213,12 +168,13 @@ const zoomReset = () => {
   state.sigmaInstance?.getCamera().animatedReset({ duration: 600 })
 }
 
-// 반만 보이도록 필터 (추후 데이터 카테고리 별로 필터 기능 구현 가능)
+// 반만 보이도록 필터
 const showHalf = (event: any) => {
-  let isChecked = event.target.checked
-  state.graph.nodes().forEach((node: any) => {
-    state.graph.setNodeAttribute(node, 'hidden', isChecked && Math.random() > 0.5)
+  const isChecked = event.target.checked
+  state.graph.forEachNode((node) => {
+    state.graph.updateNodeAttribute(node, 'hidden', () => isChecked && Math.random() > 0.5)
   })
+  state.sigmaInstance?.refresh()
 }
 
 // 랜덤으로 재정렬
@@ -227,14 +183,15 @@ const showRandom = () => {
 
   const xExtents = { min: 0, max: 0 }
   const yExtents = { min: 0, max: 0 }
-  state.graph.forEachNode((_node: any, attributes: any) => {
+  state.graph.forEachNode((node, attributes) => {
     xExtents.min = Math.min(attributes.x, xExtents.min)
     xExtents.max = Math.max(attributes.x, xExtents.max)
     yExtents.min = Math.min(attributes.y, yExtents.min)
     yExtents.max = Math.max(attributes.y, yExtents.max)
   })
+
   const randomPositions: PlainObject<PlainObject<number>> = {}
-  state.graph.forEachNode((node: any) => {
+  state.graph.forEachNode((node) => {
     randomPositions[node] = {
       x: Math.random() * (xExtents.max - xExtents.min),
       y: Math.random() * (yExtents.max - yExtents.min)
