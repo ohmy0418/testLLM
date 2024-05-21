@@ -3,12 +3,14 @@
     <RouterLink to="/sigma">Go to Sigma BigData</RouterLink>
     <RouterLink to="/sigmaGrouping">Go to Sigma Grouping</RouterLink>
   </div>
+  <p>------------------------------------------------------------------------------------------------------------------------------------------------------</p>
   <div class="wrap">
     <router-view></router-view>
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+</script>
 
 <style scoped>
 .gnb {

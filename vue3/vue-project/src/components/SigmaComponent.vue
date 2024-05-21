@@ -1,4 +1,5 @@
 <template>
+  <h2>그룹화하지 않은 10000개의 랜덤 노드로 지식 그래프 구현</h2>
   <h3>searchNode: {{ state.searchNode }}</h3>
   <div class="controls">
     <input

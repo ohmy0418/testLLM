@@ -1,4 +1,5 @@
 <template>
+  <h2>그룹화한 약 1300개의 데이터로 지식 그래프 구현</h2>
   <h3>searchNode: {{ searchNode }}</h3>
   <div class="controls">
     <input type="text" v-model="searchNode" class="text-input" placeholder="Search nodes..." />
