@@ -1,9 +1,9 @@
 # Sigmajs Test
 
-cd sigmajs/vue-project/
+`cd sigmajs/vue-project/`
 
-npm i
+`npm i`
 
-npm run format 
+`npm run format`
 
-npm run dev
+`npm run dev`
