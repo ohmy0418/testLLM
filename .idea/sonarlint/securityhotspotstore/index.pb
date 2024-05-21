@@ -127,3 +127,11 @@ G.idea/sonarlint/issuestore/1/b/1b518e29882768a7f2f78c90ee5d3da925a25f62,5/8/58
 Q.idea/sonarlint/securityhotspotstore/4/1/4188512bbdce2c97788137e191872d43a7e411d3,2/e/2ea4c9dcce726ae76cb2612e56407d0a92370708
 Å
 Q.idea/sonarlint/securityhotspotstore/0/8/08f14601170f04a42b15c445d685b9206b8c2a70,4/d/4d0fccce863f49e9bed0647b288103133bc2ea22
+i
+9vue3/vue-project/src/components/SigmaComponentDefault.vue,c/3/c30c2c96db1dabf45555f6b4218bcdd735eed4d9
+_
+/vue3/vue-project/src/views/SigmaDefaultView.vue,e/6/e6863bd3a0a9a4f17436f138d18e504c45ed7f8b
+K
+sigma/sigmajs_js/src/app.js,2/7/27898e6fa8e916ba8da3981b800ae6820d91851d
+O
+sigma/sigmajs_js/src/index.html,e/6/e6c0971286e13ac82b213d82cf76a7efe7639ec2
